@@ -1,0 +1,394 @@
+<title>Guideline Cards Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: step bar on top, one working panel, cards of the current stage below it. Core cards carry a dark border, as in Figures 1 and 2 of the guide. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --fg:#17212b; --muted:#5a6672; --line:#d5dbe1; --line-strong:#17212b;
+  --accent:#0d6a72; --accent-soft:#dcefef; --accent-fg:#ffffff; --warn:#8a5a00; --warn-soft:#fbefd2;
+  --ok:#17663a; --field:#fbfcfd;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161c; --surface:#17212a; --fg:#e8edf1; --muted:#9aa7b2; --line:#2b3945; --line-strong:#e8edf1;
+  --accent:#58c2c9; --accent-soft:#16363a; --accent-fg:#06262a; --warn:#f0c46a; --warn-soft:#3a2e12;
+  --ok:#6fd49a; --field:#101920; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --surface:#17212a; --fg:#e8edf1; --muted:#9aa7b2; --line:#2b3945; --line-strong:#e8edf1;
+  --accent:#58c2c9; --accent-soft:#16363a; --accent-fg:#06262a; --warn:#f0c46a; --warn-soft:#3a2e12;
+  --ok:#6fd49a; --field:#101920; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+h1{font-size:22px;line-height:1.2;margin:0;font-weight:600;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;max-width:62ch;margin:4px 0 0}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:7px 12px;border-radius:6px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:500}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav.steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px}
+nav.steps button{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;white-space:nowrap}
+nav.steps .n{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+nav.steps button[aria-current="step"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+nav.steps button[aria-current="step"] .n{color:inherit}
+nav.steps .done::after{content:"\2713";color:var(--ok);font-size:12px}
+nav.steps button[aria-current="step"].done::after{color:inherit}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:grid;gap:16px}
+.panel h2{margin:0;font-size:18px;font-weight:600}
+.q{font-size:16px;margin:0;color:var(--fg)}
+.hint{margin:0;color:var(--muted);font-size:13px}
+label{display:block;font-weight:500;font-size:13px;margin-bottom:4px}
+textarea,input[type=text],select{width:100%;font:inherit;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+textarea{min-height:76px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.row{display:grid;gap:6px;min-width:0}
+.matrix{display:grid;gap:8px}
+.mrow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;cursor:pointer;background:var(--field)}
+.mrow.sel{border-color:var(--accent);background:var(--accent-soft)}
+.mrow.off{opacity:.6;cursor:default}
+.mrow b{font-weight:600}
+.mrow small{display:block;color:var(--muted);margin-top:2px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--surface)}
+.tag.rec{border-color:var(--accent);color:var(--accent)}
+.box{background:var(--accent-soft);border-radius:6px;padding:10px 12px;font-size:14px}
+.warn{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 12px;font-size:13px}
+h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:8px 0 0;font-weight:600}
+details.card{border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+details.card.core{border:2px solid var(--line-strong)}
+details.card summary{cursor:pointer;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;list-style:none}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::before{content:"\25B8";color:var(--muted)}
+details.card[open] summary::before{content:"\25BE"}
+.gc{font-family:var(--font-mono);font-weight:500}
+.badge{font-size:11px;border-radius:10px;padding:1px 8px;border:1px solid var(--line);color:var(--muted)}
+.badge.core{border-color:var(--line-strong);color:var(--fg);font-weight:600}
+.badge.rec{border-color:var(--accent);color:var(--accent)}
+.badge.bad{border-color:var(--warn);color:var(--warn)}
+.cbody{padding:4px 14px 14px;display:grid;gap:10px;font-size:14px}
+.cbody p{margin:0}
+.ex{font-style:italic;color:var(--muted)}
+.use{margin-left:auto;display:flex;gap:6px;align-items:center;font-weight:500;font-size:13px}
+.use input{width:auto}
+.checks{display:grid;gap:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px;margin:0}
+.chk input{width:auto;margin-top:4px}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+pre{white-space:pre-wrap;word-break:break-word;font-family:var(--font-mono);font-size:13px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:14px;margin:0;max-height:560px;overflow:auto}
+.missing{margin:0;padding-left:18px;font-size:14px}
+.note{font-size:12px;color:var(--muted)}
+.lead{font-size:16px;margin:0;max-width:68ch}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.three{grid-template-columns:1fr}}
+.fact{border:1px solid var(--line);border-radius:6px;padding:12px 14px;background:var(--field);min-width:0}
+.fact b{display:block;margin-bottom:2px}
+.fact p{margin:0;font-size:14px;color:var(--muted)}
+.flow{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.flow button{width:100%;text-align:left;display:grid;grid-template-columns:34px minmax(0,1.4fr) minmax(0,1fr);gap:6px 14px;align-items:center;padding:10px 12px;background:var(--field)}
+@media (max-width:640px){.flow button{grid-template-columns:34px minmax(0,1fr)}.flow .cs{grid-column:2}}
+.flow .num{font-family:var(--font-mono);font-weight:500;width:28px;height:28px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);display:grid;place-items:center;font-size:13px}
+.flow .nm{font-weight:600;display:block}
+.flow .qq{color:var(--muted);font-size:13px;display:block}
+.flow .cs{display:flex;flex-wrap:wrap;gap:5px}
+.tag.core{border:2px solid var(--line-strong);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);align-items:center}
+.terms{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0;font-size:14px}
+.terms dt{font-weight:600}.terms dd{margin:0;color:var(--muted)}
+@media (max-width:560px){.terms{grid-template-columns:1fr}.terms dd{margin-bottom:6px}}
+.dlg{display:grid;gap:6px;font-size:14px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.dlg p{margin:0}.dlg .who{font-weight:600}
+
+nav.steps{flex-wrap:wrap;overflow:visible}
+.tag{white-space:nowrap}
+.help{display:block;font-size:12px;color:var(--muted);margin:-2px 0 2px}
+.plist{display:grid;gap:8px}
+.phead{display:grid;grid-template-columns:1fr 1fr 78px;gap:8px;font-size:12px;font-weight:500;color:var(--muted)}
+.prow{display:grid;grid-template-columns:1fr 1fr 78px;gap:8px;align-items:start}
+.prow textarea{min-height:56px}
+button.ghost{border-color:transparent;color:var(--muted)}
+@media (max-width:640px){.phead{display:none}.prow{grid-template-columns:1fr}.prow button.ghost{justify-self:start}}
+.badge.ok{border-color:var(--ok);color:var(--ok)}
+.badge.todo{border-color:var(--warn);color:var(--warn)}
+button[data-tickrec]{margin-left:6px;padding:3px 10px;font-size:13px}
+.hint button{vertical-align:baseline}
+.pc{display:grid;gap:3px;min-width:0}.pl{display:none;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.pl{display:block}}
+.pc textarea{min-height:56px}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Guideline Cards Prototype</h1>
+    <p class="sub">An interactive version of the lecturer guide for designing one educational chatbot conversation.</p>
+  </div>
+  <div class="tools">
+    <button id="btn-example" type="button">Load example</button>
+    <button id="btn-reset" type="button">Start empty</button>
+  </div>
+</header>
+<nav class="steps" id="stepbar" aria-label="Steps"></nav>
+<main id="main"></main>
+</div>
+
+<script>
+const ROLES=['Tutor','Practice partner','Course assistant','Scenario guide','Reflective companion'];
+const STAGES=['Purpose definition','Learner situation analysis','Conversation role selection','Dialogue flow design','Feedback and repair planning','Boundary definition'];
+const CARDS=[
+ {id:'GC-01',name:'Make the goal visible',stage:1,core:true,roles:'all',when:'Opening of every conversation',does:'State the learning objective in the language of students and what the student will do, in at most two sentences',ex:'In this conversation, you will work on one task. At the end, you will be able to explain how you solved it and why.',limits:'No explanation of content yet. The objective matches the one defined in stage 1.',decide:'Wording of the objective in the language of students'},
+ {id:'GC-02',name:'Choose the teaching method',stage:2,core:true,roles:'all',when:'Design time, at the end of stage 2, after you have defined the learning objective and the intended student activity and have analysed the learner situation',does:'Design action of the lecturer: choose one main teaching method with the selection matrix according to the main purpose of the conversation',ex:'',limits:'One main teaching method per conversation. Other methods only appear as short branches.',decide:'The teaching method'},
+ {id:'GC-03',name:'Diagnose before helping',stage:2,roles:['Tutor','Practice partner','Course assistant'],when:'After the opening, before any explanation or task',does:'Ask one short question that activates prior knowledge, then continue according to the answer',ex:'Before we start, what do you already know about this topic, in your own words?',limits:'One or two questions at most. Never framed as a test. Skipped if the student has already shown the level.',decide:'The diagnostic question and how to continue if the answer shows that the topic is known, partly known or unknown'},
+ {id:'GC-04',name:'Declare the role and its limits',stage:3,core:true,roles:'all',when:'Opening of the conversation, together with GC-01',does:'Name the role of the chatbot and its most important limit',ex:'I am your practice tutor. I give hints and ask questions, but I will not give you the finished solution.',limits:'The role stays the same for the whole conversation and matches the role chosen in stage 3.',decide:'Wording of the role and of its most important limit'},
+ {id:'GC-05',name:'One step at a time',stage:4,roles:['Tutor','Scenario guide'],when:'Multi-step tasks such as modelling, calculating or analysing a case',does:'Ask for one step defined by the lecturer, check it, then move on to the next step',ex:"Let's start with step 1. What is the first thing you need to decide?",limits:'The lecturer defines the steps and the expected answers in advance. The chatbot never reveals the solution of a later step.',decide:'The steps and the expected answer for each step'},
+ {id:'GC-06',name:'Explain in small steps',stage:4,roles:['Tutor','Practice partner','Course assistant'],when:'The diagnosis shows a gap, or the student asks for an explanation',does:'Explain one idea with a short example, then check understanding with a question',ex:'Here is the core idea in one sentence, with a short example. How would you apply it to your case?',limits:'At most three to four sentences per turn. The explanation follows the course material and is always followed by a check question.',decide:'The course material on which the explanation is based'},
+ {id:'GC-07',name:'Ask for the reasoning',stage:4,roles:['Tutor','Practice partner','Reflective companion','Scenario guide'],when:'In tasks with an expected answer, the student gives a correct answer and the reasoning is needed. In reflective tasks, the student gives an unsupported judgement or describes an action without evaluating its consequences against the agreed criterion.',does:'Ask the student to justify the answer or judgement, or to assess its effect against a criterion, before commenting on it',ex:'Why did you choose this option and not the other one?',limits:'At most once per step, so that the conversation does not feel like an interrogation. Short answers are accepted. In reflective conversations, the question asks for reasons, not for a correct answer. If the reasoning is insufficient or incorrect, the revised reasoning is assessed within the same exchange, without asking the question again.',decide:'The steps at which the reasoning is asked'},
+ {id:'GC-08',name:'Set a goal and plan',stage:4,roles:['Reflective companion','Tutor'],when:'After a reflection, or at the start of a self-study session',does:'Ask for one concrete, checkable goal and a first action, then help to sharpen it without prescribing it',ex:'What is one thing you want to do differently next time? How will you know that you did it?',limits:'The student sets the goal. The chatbot sharpens it but does not prescribe it.',decide:'The time frame of the goal, for example the next sprint or the next week'},
+ {id:'GC-09',name:'Close with reflection',stage:4,roles:['Tutor','Practice partner','Reflective companion','Scenario guide'],when:'End of the task or session',does:'Ask for a one-sentence summary and for one point that is still unclear, and refer back to the objective of GC-01',ex:'Before we finish, what is the main thing you learned today, in one sentence? What is still unclear?',limits:'No new content at this point. Unclear points lead to the course material or to the next session.',decide:'Whether unclear points lead to the course material or to the next session'},
+ {id:'GC-10',name:'Hint before solution',stage:5,roles:['Tutor','Practice partner','Scenario guide'],when:'The student gives an incomplete or incorrect answer that does not match a known misconception',does:'Give a targeted hint or guiding question instead of the full solution',ex:'You are close. Which rule or criterion applies to this step?',limits:"After the set number of unsuccessful hints, show a worked example of a similar task or refer to the course material. Never give the solution to the student's own task. If the student still cannot continue, GC-14 applies.",decide:'The number of unsuccessful hints before a worked example (default two)'},
+ {id:'GC-11',name:'Address the misconception',stage:5,roles:['Practice partner','Tutor','Scenario guide'],when:'The answer matches a misconception that you listed in stage 2',does:'Name the contrast without blaming, offer a counterexample and ask the student to rethink',ex:'Many people think so at first. Here is a case where it does not hold. What do you notice?',limits:'Only for misconceptions listed in stage 2. Other errors are handled with GC-10. After the set number of unsuccessful attempts in a step, show a worked example of a similar task or refer to the course material. If the student still cannot continue, GC-14 applies.',decide:'The list of misconceptions with a counterexample for each, and the number of unsuccessful attempts before a worked example'},
+ {id:'GC-12',name:'Clarify instead of guessing',stage:5,core:true,roles:'all',when:'The input of the student within the task is unclear or ambiguous',does:'Say that the input was not clear and ask a clarifying question, ideally with two options',ex:'I am not sure I understood. Do you mean the first option or the second one?',limits:'No evaluation before the answer is clear. After the set number of failed clarifications, by default two, the task is rephrased. If the answer remains unclear after the rephrasing, GC-14 applies.',decide:'The number of clarifications before the task is rephrased'},
+ {id:'GC-13',name:'Feed forward',stage:5,roles:['Tutor','Practice partner','Course assistant','Scenario guide'],when:'After an answer has been evaluated, following GC-07, GC-10 or GC-11 where they apply',does:'Give feedback in up to three parts: what is right, what is missing if anything, and what the next step is',ex:'This part is correct. One element is still missing. Add it in the next step.',limits:'Feedback refers to the task criteria, not to the person. No grades or scores.',decide:'The task criteria to which the feedback refers'},
+ {id:'GC-14',name:'Redirect and escalate',stage:6,core:true,roles:'all',when:'Requests outside the role, such as off-topic questions, requests to solve graded work, organisational or personal issues, or repeated failure',does:'Acknowledge the request, state the limit and point to the right person or material',ex:"I can't help with that here. For this question, the course forum is the right place.",limits:'You list the escalation points and resources in stage 6.',decide:'The escalation points and the contacts or materials for each'}
+];
+const ROWS=[
+ {purpose:'Introduce or explain unfamiliar content',verbs:'Remember or understand, for example recall, explain, summarise',method:'Explanation with check questions',roles:['Tutor','Course assistant'],rec:['GC-03','GC-06','GC-13'],byRole:{Tutor:['GC-07','GC-09','GC-10']},reflective:false},
+ {purpose:'Examine and revise a particular misconception',verbs:'Understand or analyse, for example explain, differentiate',method:'Feedback on misconceptions',roles:['Practice partner','Tutor'],rec:['GC-03','GC-06','GC-07','GC-10','GC-11','GC-13','GC-09'],byRole:{},reflective:false},
+ {purpose:'Practise performing a task',verbs:'Apply, for example execute, implement',method:'Guided practice',roles:['Tutor','Scenario guide'],rec:['GC-05','GC-07','GC-10','GC-11','GC-13','GC-09'],byRole:{Tutor:['GC-03']},reflective:false},
+ {purpose:'Practise or examine a task in a simulated case',verbs:'Analyse',method:'Guided practice or feedback on misconceptions',roles:['Scenario guide'],rec:['GC-05','GC-07','GC-10','GC-11','GC-13','GC-09'],byRole:{},reflective:false},
+ {purpose:'Evaluate own experience and plan improvement',verbs:'Evaluate, for example check, critique, reflect on own work',method:'Reflective prompting',roles:['Reflective companion'],rec:['GC-07','GC-08','GC-09'],byRole:{},reflective:true}
+];
+const CHECKS=['Does every part of the conversation serve the learning objective of step 1?','Does the order contain opening, diagnosis, guidance, feedback, repair, progression and closing where they are needed?','Can you name the pedagogical goal of every chatbot move?','Does the chatbot state its role, and is there a response for every request outside the role?','Does the specification describe the design without depending on a particular chatbot tool?','Could a colleague without chatbot experience understand the specification?'];
+const TESTS_TASK=['A correct answer','An answer with a listed misconception','Another incorrect or incomplete answer','An unclear input','A request outside the role','An error that persists after the set limit'];
+const TESTS_REFL=['An unsupported judgement','An action whose consequences the student has not evaluated','An unclear input','A request outside the role','An answer that remains unclear after the rephrasing'];
+const ROLEDESC={'Tutor':'Guides the student through a task and gives hints and feedback.','Practice partner':'Works on a problem together with the student as an equal.','Reflective companion':'Asks open questions and supports planning and self-assessment without judging.','Course assistant':'Answers questions and points to course material.','Scenario guide':'Plays a character in a simulated situation, for example a stakeholder.'};
+const METHODDESC={'Explanation with check questions':'The chatbot explains one idea with an example and then checks understanding with a question.','Guided practice':'The student solves a task step by step and receives hints and feedback at each step.','Feedback on misconceptions':'The chatbot recognises a known misconception and lets the student test it against a counterexample.','Reflective prompting':'The student reflects on their own work and sets a goal for the next step.'};
+const STEPNAMES=['Purpose','Learner situation','Role','Dialogue flow','Feedback and repair','Boundaries','Review','Specification'];
+const KEY='gc-proto-v2';
+const EMPTY={step:-1,objective:'',activity:'',prior:'',misc:[],row:-1,role:'',opening:'',order:'',steps:'',r_unclear:'',r_misc:'',r_incorrect:'',r_correct:'',criterion:'',bound:[],used:{},vals:{},omit:{},checks:{},tests:{},open:''};
+const EXAMPLE={step:0,objective:'Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'The students model the order process of an online shop themselves, step by step.',prior:'BPMN events and tasks.',
+ misc:[{a:'A parallel gateway can be used instead of an exclusive one.',b:'Each order is either shipped or cancelled, never both.'}],
+ row:2,role:'Tutor',opening:'I am your practice tutor. I give hints and ask questions, but I will not give you the finished solution.',
+ order:'Opening with the goal and the role, a short diagnostic question, four modelling steps and a closing.',
+ steps:'1. Which event starts the process? Expected: start event "Order received".\n2. Which task follows? Expected: task "Check stock".\n3. What happens after "Check stock"? Expected: exclusive gateway with the paths "in stock" and "not in stock".\n4. What happens on each path, and how does the process end? Expected: "in stock" leads to "Ship order" and an end event. "not in stock" leads to "Inform customer", "Cancel order" and an end event.',
+ r_unclear:'Clarify first with a question that offers two options, then continue.',r_misc:'The parallel gateway receives a counterexample.',r_incorrect:'Other incomplete or incorrect answers, such as a missing path, receive a hint.',r_correct:'Every evaluated answer is followed by feedback with the next step.',criterion:'',
+ bound:[{a:'The solution to the student’s own modelling task',b:'Refused. The chatbot gives hints only.'},{a:'Questions about the modelling tool',b:'Course forum'}],
+ used:{'GC-03':1,'GC-05':1,'GC-07':1,'GC-09':1,'GC-10':1,'GC-11':1,'GC-13':1},
+ vals:{'GC-05':{ex:'“Let’s start with step 1. Which event starts the process? Name it before we add any tasks.”',va:'Steps and expected answers as in step 4.',no:'Four modelling steps, from the start event to the end event.'},
+       'GC-10':{ex:'“You are close. What happens if the product is not in stock?”',va:'Two hints, then a worked example with a return process.',no:'Incomplete or incorrect modelling steps.'},
+       'GC-13':{ex:'“Your end event is correct. The path for ‘not in stock’ is still missing. Add what happens then.”',va:'Criteria: the expected answer of each step.',no:'Feedback after every modelling step.'}},
+ omit:{},checks:{},tests:{},open:''};
+const clone=o=>JSON.parse(JSON.stringify(o));
+function pairs(t){return String(t).split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf('|');return i<0?{a:x,b:''}:{a:x.slice(0,i).trim(),b:x.slice(i+1).trim()}})}
+let S=load();
+function load(){try{const t=localStorage.getItem(KEY);if(t){const o=JSON.parse(t);['misc','bound'].forEach(k=>{if(typeof o[k]==='string')o[k]=pairs(o[k])});return Object.assign(clone(EMPTY),o)}}catch(e){}return clone(EMPTY)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const row=()=>S.row>=0?ROWS[S.row]:null;
+const isReflective=()=>!!(row()&&row().reflective);
+function recommended(){const r=row();if(!r)return [];const l=r.rec.slice();(r.byRole[S.role]||[]).forEach(c=>l.push(c));return l}
+const cardById=id=>CARDS.find(c=>c.id===id);
+function cardFit(c){return c.roles==='all'||!S.role||c.roles.includes(S.role)}
+function isUsed(c){return !!c.core||!!S.used[c.id]}
+const filled=k=>S[k].filter(p=>p.a.trim());
+const fieldsFilled=id=>{const v=S.vals[id]||{};return !!((v.ex||'').trim()||(v.va||'').trim()||(v.no||'').trim())};
+function done(i){switch(i){
+ case 0:return !!(S.objective.trim()&&S.activity.trim());
+ case 1:return S.row>=0&&filled('misc').length>0;
+ case 2:return !!(S.role&&S.opening.trim());
+ case 3:return !!S.order.trim();
+ case 4:return !!(S.r_unclear.trim()&&S.r_incorrect.trim()&&S.r_correct.trim()&&(isReflective()?S.criterion.trim():S.r_misc.trim()));
+ case 5:return filled('bound').length>0;
+ case 6:return CHECKS.every((_,k)=>S.checks[k]);
+ default:return false}}
+function ta(id,label,val,ph,rows,help){return `<div class="row"><label for="${id}">${label}</label>${help?`<span class="help">${help}</span>`:''}<textarea id="${id}" data-f="${id}" placeholder="${esc(ph||'')}" style="min-height:${(rows||3)*24}px">${esc(val)}</textarea></div>`}
+function pairList(k,la,lb,pa,pb){const list=S[k].length?S[k]:[{a:'',b:''}];
+ return `<div class="plist" data-plist="${k}"><div class="phead"><span>${la}</span><span>${lb}</span><span></span></div>${list.map((p,i)=>`<div class="prow"><div class="pc"><span class="pl">${la}</span><textarea id="${k}-${i}-a" aria-label="${esc(la)} ${i+1}" data-pl="${k}|${i}|a" placeholder="${esc(i===0?pa:'')}">${esc(p.a)}</textarea></div><div class="pc"><span class="pl">${lb}</span><textarea id="${k}-${i}-b" aria-label="${esc(lb)} ${i+1}" data-pl="${k}|${i}|b" placeholder="${esc(i===0?pb:'')}">${esc(p.b)}</textarea></div><button type="button" class="ghost" data-prm="${k}|${i}" aria-label="Remove row ${i+1}">Remove</button></div>`).join('')}<div><button type="button" data-padd="${k}">Add a row</button></div></div>`}
+function cardHtml(c){
+  const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
+  const v=S.vals[c.id]||{};
+  const roles=c.roles==='all'?'All roles':c.roles.join(', ');
+  const status=used?(fieldsFilled(c.id)?'<span class="badge ok">Fields filled in</span>':'<span class="badge todo">Fill in the instance fields</span>'):'';
+  const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
+  const use=c.core?'<span class="use note">Used in every design</span>':`<label class="use" for="use-${c.id}" onclick="event.stopPropagation()"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
+  const open=S.open===c.id;
+  return `<details class="card ${c.core?'core':''}" data-card="${c.id}" ${open?'open':''}><summary><span class="gc">${c.id}</span><strong>${esc(c.name)}</strong>${badges}${use}</summary><div class="cbody">
+  <p><b>Use it when:</b> ${esc(c.when)}</p>
+  <p><b>What the chatbot does:</b> ${esc(c.does)}</p>
+  ${c.ex?`<p class="ex">“${esc(c.ex)}”</p>`:''}
+  <p><b>Limits:</b> ${esc(c.limits)}</p>
+  <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
+  ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
+  ${used?`<div class="grid3">
+   <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
+   <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
+   <div class="row"><label for="no-${c.id}">Course notes</label><textarea id="no-${c.id}" data-val="${c.id}|no" placeholder="Your remarks, for example why you adapted the card">${esc(v.no||'')}</textarea></div></div>`:''}
+  </div></details>`}
+function cardsFor(stage){
+  const cs=CARDS.filter(c=>c.stage===stage);
+  const todo=cs.filter(c=>!c.core&&recommended().includes(c.id)&&cardFit(c)&&!S.used[c.id]);
+  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it and to fill in its three instance fields. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three instance fields.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
+const EX_HINT={objective:'Example (BPMN modelling course): Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'Example (BPMN modelling course): The students model the order process themselves, step by step.'};
+
+function render(){
+  document.getElementById('stepbar').innerHTML=`<button type="button" data-go="-1" ${S.step===-1?'aria-current="step"':''}>Start here</button>`+STEPNAMES.map((n,i)=>`<button type="button" data-go="${i}" ${i===S.step?'aria-current="step"':''} class="${done(i)?'done':''}"><span class="n">${i<7?i+1:'&#8594;'}</span>${n}</button>`).join('');
+  const i=S.step;let h='';
+  if(i===-1)h=introHtml();
+  if(i===0){h=`<h2>Step 1: Purpose definition</h2><p class="q">What should students be able to do after the conversation, and what will they do in it?</p>
+   <p class="hint">Write the learning objective with a verb such as explain, implement, differentiate or critique. Then the intended student activity, for example modelling a process step by step.</p>
+   ${ta('objective','Learning objective with its verb',S.objective,'Students can ...',3,EX_HINT.objective)}${ta('activity','Intended student activity',S.activity,'In the conversation, students ...',3,EX_HINT.activity)}${cardsFor(1)}`}
+  if(i===1){const r=row();
+   h=`<h2>Step 2: Learner situation analysis</h2><p class="q">What do students already know, which misconceptions are typical, and which teaching method fits?</p>
+   <p class="hint">A misconception is a mistake that students typically make in this topic. For each one, give a counterexample, a case in which the wrong belief does not hold.</p>
+   ${ta('prior','Expected prior knowledge',S.prior,'',2)}
+   <div class="row"><label>Typical misconceptions, each with a counterexample</label>${pairList('misc','Misconception','Counterexample','A parallel gateway can be used instead of an exclusive one.','Each order is either shipped or cancelled, never both.')}</div>
+   <h3>Selection matrix</h3><p class="hint">Choose the row by the main purpose of your conversation. The verb of your learning objective is a second indication. Your row gives the teaching method, the roles that fit it and the recommended selectable cards.</p><div class="matrix" role="radiogroup" aria-label="Main purpose of your conversation">
+   ${ROWS.map((x,k)=>`<label class="mrow ${S.row===k?'sel':''}" for="row-${k}"><input type="radio" name="row" id="row-${k}" data-row="${k}" ${S.row===k?'checked':''}><span><b>${esc(x.purpose)}</b><small>Objective: ${esc(x.verbs)}. Teaching method: ${esc(x.method)}. Role: ${x.roles.join(', ')}.</small></span></label>`).join('')}
+   <div class="mrow off"><span></span><span><b>Create</b><small>Not covered by this version. If your objective is at the level Create, choose another objective for the conversation, or note which row you use instead and why.</small></span></div></div>
+   ${r?`<div class="box"><b>Your row:</b> ${esc(r.purpose)}.<br><b>Teaching method:</b> ${esc(r.method)}. ${r.method.split(' or ').map(m=>esc(METHODDESC[m[0].toUpperCase()+m.slice(1)]||METHODDESC[m]||'')).join(' ')}<br><b>Recommended selectable cards:</b> ${r.rec.map(c=>`<span class="tag rec">${c}</span>`).join(' ')}${Object.keys(r.byRole).map(k=>` and, with the role ${k}, also ${r.byRole[k].map(c=>`<span class="tag rec">${c}</span>`).join(' ')}`).join('')}</div>`:'<p class="hint">Pick a row to see the teaching method and the recommended cards.</p>'}
+   ${cardsFor(2)}`}
+  if(i===2){const r=row();const roles=r?r.roles:ROLES;
+   h=`<h2>Step 3: Conversation role selection</h2><p class="q">Which role does the chatbot take?</p>
+   <p class="hint">Choose one role from your row of the matrix. Then write the role and its most important limit in the words that students will read.</p>
+   ${r?'':'<p class="warn">Choose your row in step 2 first. Until then all roles are shown.</p>'}
+   <div class="matrix" role="radiogroup" aria-label="Role">${roles.map((x,k)=>`<label class="mrow ${S.role===x?'sel':''}" for="role-${k}"><input type="radio" name="role" id="role-${k}" data-role="${esc(x)}" ${S.role===x?'checked':''}><span><b>${x}</b><small>${esc(ROLEDESC[x])}</small></span></label>`).join('')}</div>
+   ${ta('opening','Opening sentence with the role and its most important limit',S.opening,'',3,'Example (BPMN modelling course): I am your practice tutor. I give hints and ask questions, but I will not give you the finished solution.')}${cardsFor(3)}`}
+  if(i===3){h=`<h2>Step 4: Dialogue flow design</h2><p class="q">In which order does the conversation run?</p>
+   <p class="hint">Write the order from the opening to the closing. For tasks, add the steps of the task and the expected answer for each step. Then choose the cards for the flow. Cards recommended for your row are marked.</p>
+   ${ta('order','Order from opening to closing',S.order,'',3,'Example (BPMN modelling course): Opening, a short diagnostic question, four modelling steps and a closing.')}${ta('steps','For tasks: the steps of the task and the expected answer for each step',S.steps,'',5,'Example (BPMN modelling course): Step 1, which event starts the process? Expected answer: the start event “Order received”.')}
+   ${cardsFor(4)}`}
+  if(i===4){const rf=isReflective();const notes=[];
+   if(S.role==='Course assistant'&&!S.used['GC-10'])notes.push('A course assistant that also asks check questions needs GC-10, so that incorrect answers receive a response. Add it and note this as your decision (guide, Section A.3).');
+   if(!rf&&filled('misc').length&&!recommended().includes('GC-11'))notes.push('In tasks with an expected answer, if students may show a listed misconception during another method, keep that method and add GC-11, provided that your role is listed for it (guide, Section A.3).');
+   h=`<h2>Step 5: Feedback and repair planning</h2><p class="q">What happens after a correct, incorrect, misconceived or unclear answer?</p>
+   <p class="hint">Write one response for each case. ${rf?'In reflective conversations the chatbot supports the student\u2019s own judgement without grading it, and an unclear input is still clarified first. Where you selected it, GC-07 asks for the reasoning.':'The order is: an unclear input is clarified first, listed misconceptions are addressed, and other incorrect answers receive a hint. Where you selected them, GC-07 asks for the reasoning and GC-13 gives feedback after the evaluation.'}</p>
+   ${notes.map(x=>`<p class="warn">${esc(x)}</p>`).join('')}
+   ${ta('r_unclear','Response to an unclear input',S.r_unclear,'',2,'Example (BPMN modelling course): Clarify first, then continue.')}
+   ${rf?ta('criterion','Criterion against which students evaluate their actions (reflective tasks)',S.criterion,'',2):ta('r_misc','Response to a listed misconception',S.r_misc,'',2,'Example (BPMN modelling course): The parallel gateway receives a counterexample.')}
+   ${ta('r_incorrect',rf?'Response to an unsupported judgement':'Response to another incorrect answer',S.r_incorrect,'',2,rf?'':'Example (BPMN modelling course): Other incomplete or incorrect answers receive a hint.')}
+   ${ta('r_correct','Response to a correct answer',S.r_correct,'',2,'Example (BPMN modelling course): Every evaluated answer is followed by feedback with the next step.')}${cardsFor(5)}
+   ${recommended().includes('GC-07')?'<p class="note">GC-07 “Ask for the reasoning” belongs to step 4 and also shapes the responses here. You find it in step 4.</p>':''}`}
+  if(i===5){h=`<h2>Step 6: Boundary definition</h2><p class="q">What does the chatbot refuse, and where does it send students?</p>
+   <p class="hint">List the requests outside the role. For each one, name the right contact person or material, for example the course forum.</p>
+   <div class="row"><label>Requests outside the role and where they go</label>${pairList('bound','Request outside the role','Contact person or material','Questions about the modelling tool','Course forum')}</div>${cardsFor(6)}`}
+  if(i===6){const rec=recommended();const omitted=rec.filter(id=>!S.used[id]);const tests=isReflective()?TESTS_REFL:TESTS_TASK;
+   h=`<h2>Step 7: Review</h2><p class="q">Is the design ready to be used?</p>
+   <p class="hint">Before students use the chatbot, answer the six questions and go through the test inputs. Go back to the step concerned wherever an answer is no.</p>
+   <h3>Review checklist</h3><div class="checks">${CHECKS.map((t,k)=>`<label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(t)}</label>`).join('')}</div>
+   <h3>Test inputs (${isReflective()?'reflective tasks':'tasks with an expected answer'})</h3><p class="hint">For each test input, find the response that your design describes and tick the input. If there is none, go back to the step concerned.</p><div class="checks">${tests.map((t,k)=>`<label class="chk" for="ts-${k}"><input type="checkbox" id="ts-${k}" data-ts="${k}" ${S.tests[k]?'checked':''}>${esc(t)}</label>`).join('')}</div>
+   ${omitted.length?`<h3>Recommended cards you left out</h3><p class="hint">If you leave out a recommended card, note why its function is not needed or which other card covers it.</p>${omitted.map(id=>`<div class="row"><label for="om-${id}">${id} ${esc(cardById(id).name)}</label><input type="text" id="om-${id}" data-om="${id}" value="${esc(S.omit[id]||'')}"></div>`).join('')}`:''}
+   ${S.used['GC-09']?'':'<p class="hint">You do not use GC-09, so end the conversation with a short closing that refers back to the objective of GC-01.</p>'}`}
+  if(i===7){const m=missing();
+   h=`<h2>Conversation design specification</h2><p class="q">The completed worksheet, the cards you selected with the values for your course, and the order of the conversation.</p>
+   <p class="hint">It describes what the chatbot should do and does not depend on a particular chatbot tool. You can hand it to whoever sets up the chatbot.</p>
+   ${m.length?`<div class="warn"><b>Not yet filled in:</b><ul class="missing">${m.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'<div class="box">All steps and instance fields are filled in.</div>'}
+   <div class="tools"><button type="button" class="primary" id="copy">Copy specification</button><span class="note" id="copied" role="status"></span></div>
+   <pre id="spec" tabindex="0">${esc(spec())}</pre>`}
+  document.getElementById('main').innerHTML=`<section class="panel">${h}<div class="nav">${i>-1?`<button type="button" data-go="${i-1}">Previous</button>`:'<span></span>'}${i<7?`<button type="button" class="primary" data-go="${i+1}">${i===-1?'Start with step 1':i===6?'Show specification':'Next'}</button>`:''}</div></section>`;
+}
+function introHtml(){
+ const FL=[
+  ['Purpose definition','What should students be able to do after the conversation, and what will they do in it?',['GC-01*']],
+  ['Learner situation analysis','What do students already know, which misconceptions are typical, and which teaching method fits?',['GC-02*','GC-03']],
+  ['Conversation role selection','Which role does the chatbot take?',['GC-04*']],
+  ['Dialogue flow design','In which order does the conversation run?',['GC-05','GC-06','GC-07','GC-08','GC-09']],
+  ['Feedback and repair planning','What happens after a correct, incorrect, misconceived or unclear answer?',['GC-12*','GC-10','GC-11','GC-13']],
+  ['Boundary definition','What does the chatbot refuse, and where does it send students?',['GC-14*']],
+  ['Review','Is the design ready to be used?',['Checklist']]];
+ const chip=c=>c.endsWith('*')?`<span class="tag core">${c.slice(0,-1)}</span>`:`<span class="tag">${c}</span>`;
+ return `<h2>Design one chatbot conversation for your course</h2>
+ <p class="lead">This guide helps you, as a lecturer, to plan how a chatbot should talk with your students about one learning objective. You do not build the chatbot and you do not need technical knowledge. You describe what it should do, step by step. The result is a conversation design specification that you can hand to whoever sets up the chatbot.</p>
+ <div class="three">
+  <div class="fact"><b>What you need</b><p>One learning objective from a course you teach, your course material, and the mistakes students typically make in this topic.</p></div>
+  <div class="fact"><b>What you do</b><p>Answer one question in each of seven steps. In every step, guideline cards (GC) tell you what to decide.</p></div>
+  <div class="fact"><b>What you get</b><p>A completed worksheet that you can copy as text: the conversation order, the cards you chose and the values for your course.</p></div>
+ </div>
+ <h3>The seven steps</h3>
+ <p class="hint">Select a step to jump to it. The cards shown for each step are the rules you will meet there.</p>
+ <ol class="flow">${FL.map((s,k)=>`<li><button type="button" data-go="${k}"><span class="num">${k+1}</span><span><span class="nm">${s[0]}</span><span class="qq">${s[1]}</span></span><span class="cs">${s[2].map(chip).join('')}</span></button></li>`).join('')}</ol>
+ <div class="legend"><span><span class="tag core">GC-01</span> Core card. You use it in every design.</span><span><span class="tag">GC-03</span> Selectable card. The selection matrix in step 2 recommends it or not.</span></div>
+ <h3>How the cards work</h3>
+ <p>The framework has 14 guideline cards (GC-01 to GC-14). Each card is a short rule for one move of the chatbot, for example how it opens, how it gives a hint or how it refuses a request. A card says when to use it, what the chatbot does, its limits and what you decide. Five cards are core cards and apply in every design. The other nine are selectable, and you choose them with the selection matrix.</p>
+ <h3>What a conversation looks like</h3>
+ <p class="hint">An excerpt from the constructed example in the guide. Students model an order process in BPMN with the chatbot, one modelling step at a time. “Step 3” here is the third modelling step and not step 3 of this guide. The cards used in each chatbot turn are shown next to it.</p>
+ <div class="dlg"><p><span class="who">Chatbot:</span> “Now step 3. What happens after ‘Check stock’?” <span class="tag">GC-05</span></p><p><span class="who">Student:</span> “Next comes the task ‘Ship order’.”</p><p><span class="who">Chatbot:</span> “‘Ship order’ is right for one case. You are close. What happens if the product is not in stock?” <span class="tag">GC-13</span> <span class="tag">GC-10</span></p><p><span class="who">Student:</span> “Then the order is cancelled, so there are two ways.”</p><p><span class="who">Chatbot:</span> “Exactly, two ways. The split into the two ways is still missing. Which element creates it?” <span class="tag">GC-13</span> <span class="tag">GC-10</span></p></div>
+ <h3>Terms used in the steps</h3>
+ <dl class="terms">
+  <dt>Chatbot</dt><dd>A text-based assistant that talks with students in writing. It can run on a language model or on fixed rules. The guide does not depend on a tool.</dd>
+  <dt>Learning objective</dt><dd>What students should be able to do after the conversation, written with a verb such as explain, implement or critique.</dd>
+  <dt>Selection matrix</dt><dd>A table in step 2. You pick the row that matches the main purpose of your conversation. The row gives the teaching method, the roles and the recommended cards.</dd>
+  <dt>Teaching method</dt><dd>${Object.keys(METHODDESC).map(k=>`<b>${k}.</b> ${METHODDESC[k]}`).join(' ')}</dd>
+  <dt>Role</dt><dd>${ROLES.map(k=>`<b>${k}.</b> ${ROLEDESC[k]}`).join(' ')} You choose one in step 3.</dd>
+  <dt>Misconception</dt><dd>A mistake that students typically make in this topic.</dd>
+  <dt>Counterexample</dt><dd>A case in which the wrong belief does not hold. The chatbot uses it to make students rethink.</dd>
+  <dt>Instance fields</dt><dd>The three boxes you fill in for every card you use: an example in your course, the values you chose and your notes.</dd>
+ </dl>
+ <div class="tools"><button type="button" data-example="1">Try it with the example first</button></div>
+ <p class="note">Based on the lecturer guide of a master thesis at the FHNW School of Business. The descriptions of roles and teaching methods come from the framework document. This is a prototype. Your entries stay in this browser and are not sent anywhere. The example is a constructed scenario, not a tested chatbot design.</p>`}
+function missing(){const m=[];
+ if(!S.objective.trim())m.push('Step 1: learning objective');if(!S.activity.trim())m.push('Step 1: student activity');
+ if(S.row<0)m.push('Step 2: row of the selection matrix');if(!filled('misc').length)m.push('Step 2: misconceptions with counterexamples');
+ if(!S.role)m.push('Step 3: role');if(!S.opening.trim())m.push('Step 3: opening sentence');
+ if(!S.order.trim())m.push('Step 4: order of the conversation');
+ if(!S.r_unclear.trim())m.push('Step 5: response to an unclear input');
+ if(isReflective()){if(!S.criterion.trim())m.push('Step 5: criterion for reflection')}else if(!S.r_misc.trim())m.push('Step 5: response to a listed misconception');
+ if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer');
+ if(!filled('bound').length)m.push('Step 6: requests outside the role');
+ const nc=CARDS.filter(c=>isUsed(c)&&!fieldsFilled(c.id)).map(c=>c.id);
+ if(nc.length)m.push('Instance fields for '+nc.join(', ')+' (open the card in its step)');
+ const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
+ return m}
+function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(v||'').trim()||'(not filled in)')+'\n');
+ L.push('CONVERSATION DESIGN SPECIFICATION\n');
+ L.push('1 PURPOSE DEFINITION');add('Learning objective',S.objective);add('Intended student activity',S.activity);
+ L.push('2 LEARNER SITUATION ANALYSIS');add('Expected prior knowledge',S.prior);
+ add('Typical misconceptions and counterexamples',filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n'));
+ add('Row of the selection matrix and teaching method',r?r.purpose+'. Teaching method: '+r.method:'');
+ L.push('3 CONVERSATION ROLE SELECTION');add('Role',S.role);add('Opening sentence',S.opening);
+ L.push('4 DIALOGUE FLOW DESIGN');add('Order of the conversation',S.order);if(S.steps.trim())add('Steps and expected answers',S.steps);
+ L.push('5 FEEDBACK AND REPAIR PLANNING');add('Unclear input',S.r_unclear);
+ if(isReflective())add('Criterion for reflection',S.criterion);else add('Listed misconception',S.r_misc);
+ add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);add('Correct answer',S.r_correct);
+ L.push('6 BOUNDARY DEFINITION');add('Requests outside the role',filled('bound').map(p=>'- '+p.a+(p.b?' -> '+p.b:'')).join('\n'));
+ L.push('SELECTED CARDS');
+ L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};return c.id+' '+c.name+(c.core?' (core)':'')+'\n  Example in this course: '+(v.ex||'(not filled in)')+'\n  Chosen values: '+(v.va||'(not filled in)')+'\n  Course notes: '+(v.no||'-')}).join('\n')+'\n');
+ const om=recommended().filter(id=>!S.used[id]);
+ if(om.length)L.push('RECOMMENDED CARDS LEFT OUT\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
+ return L.join('\n')}
+
+const main=document.getElementById('main');
+let armed=null;
+function arm(btn,label,fn){if(armed===btn.id){armed=null;fn();return}armed=btn.id;btn.dataset.orig=btn.textContent;btn.textContent=label;setTimeout(()=>{if(armed===btn.id){armed=null;btn.textContent=btn.dataset.orig}},4000)}
+const hasContent=()=>!!(S.objective||S.activity||S.opening||S.order||filled('misc').length||filled('bound').length);
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');if(g){S.step=+g.dataset.go;S.open='';save();render();window.scrollTo({top:0});return}
+  const ex=e.target.closest('[data-example]');if(ex){document.getElementById('btn-example').click();return}
+  const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1});save();render();return}
+  const pa=e.target.closest('[data-padd]');if(pa){const k=pa.dataset.padd;if(!S[k].length)S[k].push({a:'',b:''});S[k].push({a:'',b:''});save();render();return}
+  const pr=e.target.closest('[data-prm]');if(pr){const[k,i]=pr.dataset.prm.split('|');S[k].splice(+i,1);save();render();return}
+  if(e.target.id==='copy'){const t=document.getElementById('spec').textContent;const ok=()=>{document.getElementById('copied').textContent='Copied.'};
+    const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('spec'));const s=getSelection();s.removeAllRanges();s.addRange(r);document.getElementById('copied').textContent='Selected. Press Ctrl+C to copy.'};
+    try{navigator.clipboard.writeText(t).then(ok,fb)}catch(x){fb()}}
+});
+document.getElementById('btn-example').onclick=function(){const go=()=>{S=Object.assign(clone(EMPTY),clone(EXAMPLE));save();render();window.scrollTo({top:0})};if(hasContent()&&S.objective!==EXAMPLE.objective)arm(this,'Click again to replace your entries',go);else go()};
+document.getElementById('btn-reset').onclick=function(){const go=()=>{S=clone(EMPTY);save();render();window.scrollTo({top:0})};if(hasContent())arm(this,'Click again to delete your entries',go);else go()};
+main.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.f){S[t.dataset.f]=t.value;save();refreshDone();return}
+  if(t.dataset.pl){const[k,i,f]=t.dataset.pl.split('|');while(S[k].length<=+i)S[k].push({a:'',b:''});S[k][+i][f]=t.value;save();refreshDone();return}
+  if(t.dataset.val){const[a,b]=t.dataset.val.split('|');(S.vals[a]=S.vals[a]||{})[b]=t.value;save();return}
+  if(t.dataset.om){S.omit[t.dataset.om]=t.value;save()}});
+main.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.row!==undefined){S.row=+t.dataset.row;if(!row().roles.includes(S.role))S.role='';save();render();return}
+  if(t.dataset.role){S.role=t.dataset.role;save();render();return}
+  if(t.dataset.use){if(t.checked)S.used[t.dataset.use]=1;else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
+  if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();return}
+  if(t.dataset.ts!==undefined){S.tests[t.dataset.ts]=t.checked;save()}});
+main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card){if(d.open)S.open=d.dataset.card}},true);
+function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
+render();
+</script>
