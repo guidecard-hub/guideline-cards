@@ -33,6 +33,14 @@ test inputs must match the lecturer guide. After a change, open the page, load t
 
 This is a check of correctness by the author and the AI assistant. It is not a usability test with lecturers.
 
+## Findings during development
+
+- **Specification not self-contained (22 November 2026).** The author pasted a specification into a general chatbot.
+  The chatbot could not know what a guideline card or the label GC stands for, because the text only named the cards.
+  Change: the specification now starts with a short explanation of how to read it and lists, for every selected card,
+  when it applies, what the chatbot does, its limits and the values chosen by the lecturer. The role description is included.
+  This matches the thesis, where the specification contains the worksheet and the selected cards.
+
 ## Known limits
 
 - Not tested in Safari and Firefox.
@@ -40,7 +48,7 @@ This is a check of correctness by the author and the AI assistant. It is not a u
 - The start page is long. About 900 words on three screens.
 - The term "instance fields" comes from the thesis and is not a lecturer's word.
 - Entries live in one browser only. There is no save to file yet.
-- The specification can only be copied as text.
+- The specification can only be copied as text. It has not yet been tested systematically with different chatbots.
 
 ## Plan
 

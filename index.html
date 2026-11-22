@@ -345,20 +345,21 @@ function missing(){const m=[];
  return m}
 function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(v||'').trim()||'(not filled in)')+'\n');
  L.push('CONVERSATION DESIGN SPECIFICATION\n');
+ L.push('HOW TO READ THIS SPECIFICATION\nThis document was written by a lecturer. It describes how a chatbot conducts one conversation with students of a university course. If you are the chatbot, follow it. If you are a person building the chatbot, use it as the design. The conversation is built from guideline cards. A guideline card is a short rule for one move of the chatbot, for example how it opens the conversation, how it gives a hint or how it refuses a request. Each selected card is listed at the end with when it applies, what the chatbot does, its limits and the values the lecturer chose for this course. The labels such as GC-05 only name the cards. The chatbot does not mention them to students.\n');
  L.push('1 PURPOSE DEFINITION');add('Learning objective',S.objective);add('Intended student activity',S.activity);
  L.push('2 LEARNER SITUATION ANALYSIS');add('Expected prior knowledge',S.prior);
  add('Typical misconceptions and counterexamples',filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n'));
  add('Row of the selection matrix and teaching method',r?r.purpose+'. Teaching method: '+r.method:'');
- L.push('3 CONVERSATION ROLE SELECTION');add('Role',S.role);add('Opening sentence',S.opening);
+ L.push('3 CONVERSATION ROLE SELECTION');add('Role',S.role+(S.role&&ROLEDESC[S.role]?'. '+ROLEDESC[S.role]:''));add('Opening sentence',S.opening);
  L.push('4 DIALOGUE FLOW DESIGN');add('Order of the conversation',S.order);if(S.steps.trim())add('Steps and expected answers',S.steps);
  L.push('5 FEEDBACK AND REPAIR PLANNING');add('Unclear input',S.r_unclear);
  if(isReflective())add('Criterion for reflection',S.criterion);else add('Listed misconception',S.r_misc);
  add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);add('Correct answer',S.r_correct);
  L.push('6 BOUNDARY DEFINITION');add('Requests outside the role',filled('bound').map(p=>'- '+p.a+(p.b?' -> '+p.b:'')).join('\n'));
- L.push('SELECTED CARDS');
- L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};return c.id+' '+c.name+(c.core?' (core)':'')+'\n  Example in this course: '+(v.ex||'(not filled in)')+'\n  Chosen values: '+(v.va||'(not filled in)')+'\n  Course notes: '+(v.no||'-')}).join('\n')+'\n');
+ L.push('SELECTED GUIDELINE CARDS\nEach card is a rule for one move of the chatbot. Apply every card where its condition holds.\n');
+ L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+'\n  Example from this course: '+(v.ex||'(not filled in)')+'\n  Values chosen by the lecturer: '+(v.va||'(not filled in)')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
  const om=recommended().filter(id=>!S.used[id]);
- if(om.length)L.push('RECOMMENDED CARDS LEFT OUT\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
+ if(om.length)L.push('NOTE FOR THE LECTURER AND DEVELOPER, NOT AN INSTRUCTION TO THE CHATBOT\nRecommended cards left out\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
  return L.join('\n')}
 
 const main=document.getElementById('main');
