@@ -56,8 +56,7 @@ the lecturer guide of the thesis. The thesis is the authoritative source.
 ## Roadmap
 
 - Download of the specification as a Word file.
-- A complete example, fewer boxes per card and a check that the design is complete.
-- Step 5 for reflective designs.
+- Fewer boxes per card and a check that the design is complete.
 - A decision whether the specification needs a second version written directly for a chatbot.
 - Accessibility check with a screen reader and tests in Safari.
 - Evaluation in walkthrough sessions with lecturers, as planned in the thesis.

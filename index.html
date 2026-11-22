@@ -195,19 +195,31 @@ const ROLEDESC={'Tutor':'Guides the student through a task and gives hints and f
 const METHODDESC={'Explanation with check questions':'The chatbot explains one idea with an example and then checks understanding with a question.','Guided practice':'The student solves a task step by step and receives hints and feedback at each step.','Feedback on misconceptions':'The chatbot recognises a known misconception and lets the student test it against a counterexample.','Reflective prompting':'The student reflects on their own work and sets a goal for the next step.'};
 const STEPNAMES=['Purpose','Learner situation','Role','Dialogue flow','Feedback and repair','Boundaries','Review','Specification'];
 const KEY='gc-proto-v2';
-const EMPTY={step:-1,objective:'',activity:'',prior:'',misc:[],row:-1,role:'',opening:'',order:'',steps:'',r_unclear:'',r_misc:'',r_incorrect:'',r_correct:'',criterion:'',bound:[],used:{},vals:{},omit:{},checks:{},tests:{},open:''};
-const EXAMPLE={step:0,objective:'Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'The students model the order process of an online shop themselves, step by step.',prior:'BPMN events and tasks.',
+const EMPTY={step:-1,objective:'',activity:'',prior:'',misc:[],row:-1,role:'',opening:'',order:'',steps:'',r_unclear:'',r_misc:'',r_incorrect:'',r_correct:'',r_action:'',criterion:'',bound:[],used:{},vals:{},omit:{},checks:{},tests:{},open:''};
+const EXAMPLE={step:0,objective:'Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'The students model the order process of an online shop themselves, step by step. The task: an online shop checks whether an ordered product is in stock. If yes, the order is shipped. If not, the customer is informed and the order is cancelled.',prior:'BPMN events and tasks.',
  misc:[{a:'A parallel gateway can be used instead of an exclusive one.',b:'Each order is either shipped or cancelled, never both.'}],
- row:2,role:'Tutor',opening:'I am your practice tutor. I give hints and ask questions, but I will not give you the finished solution.',
+ row:2,role:'Tutor',opening:'I am your BPMN tutor. I give hints and ask questions, but I will not draw the model for you.',
  order:'Opening with the goal and the role, a short diagnostic question, four modelling steps and a closing.',
- steps:'1. Which event starts the process? Expected: start event "Order received".\n2. Which task follows? Expected: task "Check stock".\n3. What happens after "Check stock"? Expected: exclusive gateway with the paths "in stock" and "not in stock".\n4. What happens on each path, and how does the process end? Expected: "in stock" leads to "Ship order" and an end event. "not in stock" leads to "Inform customer", "Cancel order" and an end event.',
- r_unclear:'Clarify first with a question that offers two options, then continue.',r_misc:'The parallel gateway receives a counterexample.',r_incorrect:'Other incomplete or incorrect answers, such as a missing path, receive a hint.',r_correct:'Every evaluated answer is followed by feedback with the next step.',criterion:'',
- bound:[{a:'The solution to the student’s own modelling task',b:'Refused. The chatbot gives hints only.'},{a:'Questions about the modelling tool',b:'Course forum'}],
+ steps:'1. Which event starts the process? Expected: start event "Order received".\n2. Which task follows the start event? Expected: task "Check stock".\n3. What happens after "Check stock"? Expected: exclusive gateway with the paths "in stock" and "not in stock".\n4. What happens on each path, and how does the process end? Expected: "in stock" leads to "Ship order" and an end event. "not in stock" leads to "Inform customer", "Cancel order" and an end event.',
+ r_unclear:'Clarify first with a question that offers two options, for example “Do you mean a task or an event?”. After two clarifications, rephrase the question of the step. If the answer is still unclear, refer the student to the lecturer.',
+ r_misc:'A parallel gateway in step 3 receives a counterexample and a request to rethink, together with feedback in the same turn. After two unsuccessful attempts, show the worked example.',
+ r_incorrect:'Other incomplete or incorrect answers, such as a task instead of an event, only one path or a missing end event, receive a hint and then feedback. After two unsuccessful hints, show the worked example and repeat the question of the step.',
+ r_correct:'Every evaluated answer is followed by feedback with the next step. In step 3, a reasoning question comes first, and the reasoning is assessed against the criterion in the notes of GC-07.',r_action:'',criterion:'',
+ bound:[{a:'The solution to the student’s own modelling task',b:'Refused. The chatbot states the limit and continues with the step.'},{a:'Questions about the modelling tool',b:'Course forum'},{a:'No progress after the worked example, or an answer that stays unclear after rephrasing',b:'The lecturer'}],
  used:{'GC-03':1,'GC-05':1,'GC-07':1,'GC-09':1,'GC-10':1,'GC-11':1,'GC-13':1},
- vals:{'GC-05':{ex:'“Let’s start with step 1. Which event starts the process? Name it before we add any tasks.”',va:'Steps and expected answers as in step 4.',no:'Four modelling steps, from the start event to the end event.'},
-       'GC-10':{ex:'“You are close. What happens if the product is not in stock?”',va:'Two hints, then a worked example with a return process.',no:'Incomplete or incorrect modelling steps.'},
-       'GC-13':{ex:'“Your end event is correct. The path for ‘not in stock’ is still missing. Add what happens then.”',va:'Criteria: the expected answer of each step.',no:'Feedback after every modelling step.'}},
- omit:{},checks:{},tests:{},open:''};
+ vals:{
+  'GC-01':{ex:'“In this conversation, you will model an order process in BPMN step by step. At the end, you will be able to explain why the process needs an exclusive gateway.”',va:'Objective in the language of students.',no:'Objective at the level apply.'},
+  'GC-03':{ex:'“Before we start, which BPMN elements do you already know, and what is each one used for?”',va:'Known: continue with step 1. Partly known or unknown: refer to the course material on events and tasks, then continue with step 1.',no:'Expected prior knowledge: BPMN events and tasks.'},
+  'GC-04':{ex:'“I am your BPMN tutor. I give hints and ask questions, but I will not draw the model for you.”',va:'Role: tutor. Limit: no solution to the student’s own model.',no:'Stated together with GC-01 at the opening.'},
+  'GC-05':{ex:'“Let’s start with step 1. Which event starts the process? Name it before we add any tasks.”',va:'Four modelling steps, from the start event to the end event.',no:'Steps and expected answers as in step 4.'},
+  'GC-07':{ex:'“Why did you choose an exclusive gateway and not a parallel one?”',va:'Step 3 only, at most once.',no:'Short answers are accepted. Accepted reasoning: each order takes only one of the two paths, depending on the result of the stock check. Insufficient reasoning, for example “because that is the right gateway”: GC-13 names what is missing and the student completes it. Incorrect reasoning, for example both paths run at the same time: handle it as the listed misconception with GC-11.'},
+  'GC-09':{ex:'“Before we finish, what is the main thing you learned about gateways today, in one sentence? What is still unclear?”',va:'Unclear points lead to the course material on gateways.',no:'Used after step 4.'},
+  'GC-10':{ex:'“You are close. What happens if the product is not in stock?”',va:'Two hints per step, then a worked example.',no:'Hints. Step 1: “Which BPMN element shows where a process begins?” then “A process begins with an event, not with a task. What happens first in the shop?” Step 2: “What does the shop do first when an order arrives?” then “Before shipping, the shop has to know whether it can deliver. Which task finds this out?” Step 3: “You are close. What happens if the product is not in stock?” then “For each order, only one of the two paths can happen. Which gateway lets the process take exactly one path?” Step 4: “Where does the process end on each path?” then “Each path has to reach an end event. What happens to the order on the path ‘not in stock’ before it ends?” Worked example, return process: A shop receives a returned product and checks whether it is damaged. If it is damaged, the refund is refused. If not, the refund is issued. The model starts with the event “Return received”, continues with the task “Check product” and an exclusive gateway with the paths “damaged” and “not damaged”, and has one task and one end event on each path.'},
+  'GC-11':{ex:'“If both paths started at the same time, the shop would ship the order and cancel it. Can that be right?”',va:'Misconception: a parallel gateway can be used instead of an exclusive one. Counterexample as in step 2. Two unsuccessful attempts, then the worked example.',no:'Listed in step 2.'},
+  'GC-12':{ex:'“I am not sure I understood. Do you mean a task or an event?”',va:'Two clarifications, then the question of the step is rephrased. If the answer remains unclear, GC-14 applies.',no:'Used in every step.'},
+  'GC-13':{ex:'“Your end event is correct. The path for ‘not in stock’ is still missing. Add what happens then.”',va:'Criteria: the expected answer of each step.',no:'Used after every evaluated answer.'},
+  'GC-14':{ex:'“I can’t help with the modelling tool here. For questions about the tool, the course forum is the right place.”',va:'Tool questions: course forum. Requests for the solution: state the limit and continue the step. No progress after the worked example or an answer that remains unclear: refer to the lecturer.',no:'Contacts: course forum and lecturer.'}},
+ omit:{'GC-06':'Students with gaps in their prior knowledge are referred to the course material (GC-03), so that the conversation stays focused on the modelling task.','GC-08':'The exercise ends with the summary of GC-09 and needs no separate goal for the next learning step.'},checks:{},tests:{},open:''};
 const clone=o=>JSON.parse(JSON.stringify(o));
 function pairs(t){return String(t).split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf('|');return i<0?{a:x,b:''}:{a:x.slice(0,i).trim(),b:x.slice(i+1).trim()}})}
 let S=load();
@@ -221,13 +233,14 @@ const cardById=id=>CARDS.find(c=>c.id===id);
 function cardFit(c){return c.roles==='all'||!S.role||c.roles.includes(S.role)}
 function isUsed(c){return !!c.core||!!S.used[c.id]}
 const filled=k=>S[k].filter(p=>p.a.trim());
+const needsBoxes=c=>c.id!=='GC-02';
 const fieldsFilled=id=>{const v=S.vals[id]||{};return !!((v.ex||'').trim()||(v.va||'').trim()||(v.no||'').trim())};
 function done(i){switch(i){
  case 0:return !!(S.objective.trim()&&S.activity.trim());
- case 1:return S.row>=0&&filled('misc').length>0;
+ case 1:return S.row>=0&&(isReflective()||filled('misc').length>0);
  case 2:return !!(S.role&&S.opening.trim());
  case 3:return !!S.order.trim();
- case 4:return !!(S.r_unclear.trim()&&S.r_incorrect.trim()&&S.r_correct.trim()&&(isReflective()?S.criterion.trim():S.r_misc.trim()));
+ case 4:return isReflective()?!!(S.r_unclear.trim()&&S.criterion.trim()&&S.r_incorrect.trim()&&S.r_action.trim()):!!(S.r_unclear.trim()&&S.r_incorrect.trim()&&S.r_correct.trim()&&S.r_misc.trim());
  case 5:return filled('bound').length>0;
  case 6:return CHECKS.every((_,k)=>S.checks[k]);
  default:return false}}
@@ -238,7 +251,7 @@ function cardHtml(c){
   const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
   const v=S.vals[c.id]||{};
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
-  const status=used?(fieldsFilled(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
+  const status=used&&needsBoxes(c)?(fieldsFilled(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
   const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
@@ -249,7 +262,8 @@ function cardHtml(c){
   <p><b>Limits:</b> ${esc(c.limits)}</p>
   <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
   ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
-  ${used?`<div class="grid3">
+  ${used&&!needsBoxes(c)?'<p class="note">This card needs no boxes. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
+  ${used&&needsBoxes(c)?`<div class="grid3">
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
    <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
    <div class="row"><label for="no-${c.id}">Course notes</label><textarea id="no-${c.id}" data-val="${c.id}|no" placeholder="Your remarks, for example why you adapted the card">${esc(v.no||'')}</textarea></div></div>`:''}
@@ -272,6 +286,7 @@ function renderInner(){
    <p class="hint">A misconception is a mistake that students typically make in this topic. For each one, give a counterexample, a case in which the wrong belief does not hold.</p>
    ${ta('prior','Expected prior knowledge',S.prior,'',2)}
    <div class="row"><label>Typical misconceptions, each with a counterexample</label>${pairList('misc','Misconception','Counterexample','A parallel gateway can be used instead of an exclusive one.','Each order is either shipped or cancelled, never both.')}</div>
+   ${isReflective()?'<p class="note">In a reflective conversation, misconceptions are optional.</p>':''}
    <h3>Selection matrix</h3><p class="hint">Choose the row by the main purpose of your conversation. The verb of your learning objective is a second indication. Your row gives the teaching method, the roles that fit it and the recommended selectable cards.</p><div class="matrix" role="radiogroup" aria-label="Main purpose of your conversation">
    ${ROWS.map((x,k)=>`<label class="mrow ${S.row===k?'sel':''}" for="row-${k}"><input type="radio" name="row" id="row-${k}" data-row="${k}" ${S.row===k?'checked':''}><span><b>${esc(x.purpose)}</b><small>Objective: ${esc(x.verbs)}. Teaching method: ${esc(x.method)}. Role: ${x.roles.join(', ')}.</small></span></label>`).join('')}
    <div class="mrow off"><span></span><span><b>Create</b><small>Not covered by this version. If your objective is at the level Create, choose another objective for the conversation, or note which row you use instead and why.</small></span></div></div>
@@ -296,7 +311,7 @@ function renderInner(){
    ${ta('r_unclear','Response to an unclear input',S.r_unclear,'',2,'Example (BPMN modelling course): Clarify first, then continue.')}
    ${rf?ta('criterion','Criterion against which students evaluate their actions (reflective tasks)',S.criterion,'',2):ta('r_misc','Response to a listed misconception',S.r_misc,'',2,'Example (BPMN modelling course): The parallel gateway receives a counterexample.')}
    ${ta('r_incorrect',rf?'Response to an unsupported judgement':'Response to another incorrect answer',S.r_incorrect,'',2,rf?'':'Example (BPMN modelling course): Other incomplete or incorrect answers receive a hint.')}
-   ${ta('r_correct','Response to a correct answer',S.r_correct,'',2,'Example (BPMN modelling course): Every evaluated answer is followed by feedback with the next step.')}${cardsFor(5)}
+   ${rf?ta('r_action','Response to an action whose consequences the student has not evaluated',S.r_action,'',2):ta('r_correct','Response to a correct answer',S.r_correct,'',2,'Example (BPMN modelling course): Every evaluated answer is followed by feedback with the next step.')}${cardsFor(5)}
    ${recommended().includes('GC-07')?'<p class="note">GC-07 “Ask for the reasoning” belongs to step 4 and also shapes the responses here. You find it in step 4.</p>':''}`}
   if(i===5){h=`<h2>Step 6: Boundary definition</h2><p class="q">What does the chatbot refuse, and where does it send students?</p>
    <p class="hint">List the requests outside the role. For each one, name the right contact person or material, for example the course forum.</p>
@@ -359,14 +374,14 @@ function introHtml(){
  <p class="note">Based on the lecturer guide of a master thesis at the FHNW School of Business. The descriptions of roles and teaching methods come from the framework document. This is a prototype. Your entries stay in this browser and are not sent anywhere. The example is a constructed scenario, not a tested chatbot design.</p>`}
 function missing(){const m=[];
  if(!S.objective.trim())m.push('Step 1: learning objective');if(!S.activity.trim())m.push('Step 1: student activity');
- if(S.row<0)m.push('Step 2: row of the selection matrix');if(!filled('misc').length)m.push('Step 2: misconceptions with counterexamples');
+ if(S.row<0)m.push('Step 2: row of the selection matrix');if(!isReflective()&&!filled('misc').length)m.push('Step 2: misconceptions with counterexamples');
  if(!S.role)m.push('Step 3: role');if(!S.opening.trim())m.push('Step 3: opening sentence');
  if(!S.order.trim())m.push('Step 4: order of the conversation');
  if(!S.r_unclear.trim())m.push('Step 5: response to an unclear input');
- if(isReflective()){if(!S.criterion.trim())m.push('Step 5: criterion for reflection')}else if(!S.r_misc.trim())m.push('Step 5: response to a listed misconception');
- if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer');
+ if(isReflective()){if(!S.criterion.trim())m.push('Step 5: criterion for reflection');if(!S.r_incorrect.trim())m.push('Step 5: response to an unsupported judgement');if(!S.r_action.trim())m.push('Step 5: response to an action whose consequences the student has not evaluated')}
+ else{if(!S.r_misc.trim())m.push('Step 5: response to a listed misconception');if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer')}
  if(!filled('bound').length)m.push('Step 6: requests outside the role');
- const nc=CARDS.filter(c=>isUsed(c)&&!fieldsFilled(c.id)).map(c=>c.id);
+ const nc=CARDS.filter(c=>isUsed(c)&&needsBoxes(c)&&!fieldsFilled(c.id)).map(c=>c.id);
  if(nc.length)m.push('Course details for '+nc.join(', ')+' (open the card in its step)');
  const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
  return m}
@@ -375,18 +390,19 @@ function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(
  L.push('HOW TO READ THIS SPECIFICATION\nThis document was written by a lecturer. It describes how a chatbot conducts one conversation with students of a university course. If you are the chatbot, follow it. If you are a person building the chatbot, use it as the design. The conversation is built from guideline cards. A guideline card is a short rule for one move of the chatbot, for example how it opens the conversation, how it gives a hint or how it refuses a request. Each selected card is listed at the end with when it applies, what the chatbot does, its limits and the values the lecturer chose for this course. The labels such as GC-05 only name the cards. The chatbot does not mention them to students.\n');
  L.push('1 PURPOSE DEFINITION');add('Learning objective',S.objective);add('Intended student activity',S.activity);
  L.push('2 LEARNER SITUATION ANALYSIS');add('Expected prior knowledge',S.prior);
- add('Typical misconceptions and counterexamples',filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n'));
+ add('Typical misconceptions and counterexamples',filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n')||(isReflective()?'None listed.':''));
  add('Row of the selection matrix and teaching method',r?r.purpose+'. Teaching method: '+r.method:'');
  L.push('3 CONVERSATION ROLE SELECTION');add('Role',S.role+(S.role&&ROLEDESC[S.role]?'. '+ROLEDESC[S.role]:''));add('Opening sentence',S.opening);
  L.push('4 DIALOGUE FLOW DESIGN');add('Order of the conversation',S.order);if(S.steps.trim())add('Steps and expected answers',S.steps);
  L.push('5 FEEDBACK AND REPAIR PLANNING');add('Unclear input',S.r_unclear);
  if(isReflective())add('Criterion for reflection',S.criterion);else add('Listed misconception',S.r_misc);
- add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);add('Correct answer',S.r_correct);
+ add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);if(isReflective())add('Action whose consequences the student has not evaluated',S.r_action);else add('Correct answer',S.r_correct);
  L.push('6 BOUNDARY DEFINITION');add('Requests outside the role',filled('bound').map(p=>'- '+p.a+(p.b?' -> '+p.b:'')).join('\n'));
  L.push('SELECTED GUIDELINE CARDS\nEach card is a rule for one move of the chatbot. Apply every card where its condition holds.\n');
- L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+'\n  Example from this course: '+(v.ex||'(not filled in)')+'\n  Values chosen by the lecturer: '+(v.va||'(not filled in)')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
- const om=recommended().filter(id=>!S.used[id]);
- if(om.length)L.push('NOTE FOR THE LECTURER AND DEVELOPER, NOT AN INSTRUCTION TO THE CHATBOT\nRecommended cards left out\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
+ L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};if(c.id==='GC-02')return c.id+' '+c.name+' (applies in every conversation)\n  Chosen at design time: '+(r?r.method:'(not filled in)')+'. The conversation uses this one main teaching method. Other methods appear only as short branches.';return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+'\n  Example from this course: '+(v.ex||'(not filled in)')+'\n  Values chosen by the lecturer: '+(v.va||'(not filled in)')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
+ const om=recommended().filter(id=>!S.used[id]);const tl=isReflective()?TESTS_REFL:TESTS_TASK;
+ L.push('NOTES FOR THE LECTURER AND DEVELOPER, NOT INSTRUCTIONS TO THE CHATBOT\n\nReview checklist (step 7)\n'+CHECKS.map((q,k)=>(S.checks[k]?'[x] ':'[ ] ')+q).join('\n')+'\n\nTest inputs. Marked when the design describes a response.\n'+tl.map((q,k)=>(S.tests[k]?'[x] ':'[ ] ')+q).join('\n')+'\n');
+ if(om.length)L.push('Recommended cards left out\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
  return L.join('\n')}
 
 const main=document.getElementById('main');

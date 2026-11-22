@@ -40,10 +40,16 @@ In steps 2 to 6 you open the cards of the step. Each card has three boxes to fil
 the values you chose, and your notes. The button "Use all recommended cards of this step" ticks the cards that the
 selection matrix recommends. Nothing is ticked without a click.
 
+## Reflective conversations
+
+If your purpose is to evaluate your own experience and plan improvement, choose the last row of the selection matrix. Step 2 then needs no
+misconceptions. Step 5 asks for the criterion against which students evaluate their actions and for two responses, one to an unsupported
+judgement and one to an action whose consequences the student has not evaluated. There is no response to a correct answer.
+
 ## The specification
 
 The last page shows the specification with the conversation order, the cards you chose and your values.
-Missing items are listed above it. Copy the text or download it as a text file and keep it as a document. Update it when your course changes.
+At the end, a review record shows the ticks of step 7. It is a note for you and the developer, not an instruction to the chatbot. Missing items are listed above it. Copy the text or download it as a text file and keep it as a document. Update it when your course changes.
 
 ## Tips
 

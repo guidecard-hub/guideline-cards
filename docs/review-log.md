@@ -22,6 +22,10 @@ The findings below are grouped by what was done. Findings were checked against t
 | Start page was long. | Start buttons at the top, details behind "Read more". The step bar scrolls on phones. |
 | "Instance fields" is a thesis term. | The interface says "course details". |
 | GC-07 was missing in the step 5 overview. | Added, as in the guide. |
+| The example filled the course details of only three of its twelve cards. | The example now follows Scenario 1 of the framework document in full, including the hints, the worked example and the acceptance criterion. Only the review in step 7 is left open on purpose. |
+| Reflective designs asked for a response to a correct answer, required misconceptions and had no field for an action that the student has not evaluated. This error came from the page, not from the guide. | Step 5 shows the criterion, the response to an unsupported judgement and the response to an unevaluated action. Misconceptions are optional. |
+| GC-02 asked for boxes that do not exist for a design-time card, and its text did not fit a chatbot. | GC-02 has no boxes. The specification states the chosen teaching method. |
+| The results of the review (step 7) were not part of the specification. | The specification ends with a review record, marked as a note for the lecturer and developer. |
 | The specification could only be copied. | It can also be downloaded as a text file. |
 
 ## Open, decided for later
@@ -29,11 +33,8 @@ The findings below are grouped by what was done. Findings were checked against t
 | Finding | Status |
 |---|---|
 | Card boxes repeat earlier answers and take too long. | To do. Prefill from the step answers and no boxes for GC-02. |
-| The example is incomplete. | To do. Use the complete specification of Scenario 1 from the framework document. |
-| Completeness is not checked in context. | To do. |
-| Reflective designs ask for a correct-answer response. | To do. |
+| Completeness is not checked in context, for example both sides of a pair. | To do. |
 | Two candidate methods for simulated cases. | To do. |
-| Step 7 results are not part of the specification. | Decision needed. |
 | A second output written directly for a chatbot. | Decision needed. The framework treats the transfer to a chatbot as outside its scope. |
 | Word download. | To do. |
 | Browser Back leaves the page. | Minor. Not changed. |
