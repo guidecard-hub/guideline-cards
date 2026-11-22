@@ -28,10 +28,11 @@ test inputs must match the lecturer guide. After a change, open the page, load t
 
 - A blind click-through with an own learning objective (business mathematics) for a calculation task and for a reflective task.
 - Comparison of all 14 cards, the matrix, the checklist and the test inputs with the guide and the framework document.
-- Automated click-through with Playwright in Chromium at desktop and phone width.
+- Automated click-through with Playwright in Chromium at desktop and phone width, including save and load, blocked storage, two tabs, keyboard focus and downloads.
 - Opening the file from disk without an internet connection. No script errors and no sideways scrolling.
+- Two independent AI-assisted reviews on 22 November 2026 (Claude Code and ChatGPT Codex). See [review-log.md](review-log.md).
 
-This is a check of correctness by the author and the AI assistant. It is not a usability test with lecturers.
+These are checks of correctness by the author and AI assistants. They are not a usability test with lecturers.
 
 ## Findings during development
 
@@ -43,20 +44,25 @@ This is a check of correctness by the author and the AI assistant. It is not a u
 
 ## Known limits
 
-- Not tested in Safari and Firefox.
-- No accessibility audit yet. Keyboard use and screen readers have not been checked systematically.
-- The start page is long. About 900 words on three screens.
-- The term "instance fields" comes from the thesis and is not a lecturer's word.
-- Entries live in one browser only. There is no save to file yet.
-- The specification can only be copied as text. It has not yet been tested systematically with different chatbots.
+- Not tested in Safari on a Mac or iPhone, on touch hardware or with a screen reader.
+- Accessibility was checked with automated tools by the reviewers, not with assistive technology.
+- Each card asks for three boxes, and several repeat answers from earlier steps. A lecturer may not finish them in one session.
+- The example fills the card boxes for only three of its twelve cards.
+- Step 5 for reflective designs still asks for a response to a correct answer, which does not exist there.
+- The page does not check that a design is complete in context, for example both sides of a pair.
+- The specification can be copied or saved as a text file. A Word file is not available yet.
+- The specification is written as a design document. It has not been tested systematically with different chatbots.
+- The page uses the thesis term "instance fields" only in the explanation of the term. The interface says "course details".
 
 ## Plan
 
-1. Shorter start page and plain wording.
-2. Save and load of the entries as a file. Download of the specification as a Word file.
-3. Accessibility check and tests in more browsers.
-4. A decision whether to split data and code into separate files, after the walkthroughs.
-5. Evaluation in walkthrough sessions with lecturers.
+1. Complete example, fewer boxes per card, check of completeness.
+2. Step 5 for reflective designs.
+3. Download of the specification as a Word file.
+4. Decision whether the specification needs a second version written directly for a chatbot.
+5. Decision whether to move the content into a data block, after the walkthroughs.
+6. Accessibility check with a screen reader and tests in Safari.
+7. Evaluation in walkthrough sessions with lecturers.
 
 ## Use of AI in development
 

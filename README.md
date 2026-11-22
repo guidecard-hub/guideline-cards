@@ -15,7 +15,8 @@ Lecturer-Facing Guideline Cards for Higher Education*.
 1. Opens the page and reads the start page. The button "Load example" fills in a constructed example.
 2. Works through the seven steps (purpose, learner situation, role, dialogue flow, feedback and repair, boundaries, review).
 3. Uses the 14 guideline cards that the selection matrix recommends. Five cards are core cards and apply in every design.
-4. Copies the finished specification and hands it to whoever sets up the chatbot, or uses it as a system prompt draft.
+4. Copies or downloads the finished specification and hands it to whoever sets up the chatbot, or uses it as a draft for the instructions of a chatbot.
+5. Can save the entries as a file at any time and load them again later or on another computer.
 
 A lecturer needs one learning objective from a course they teach, the course material and the mistakes
 students typically make in the topic.
@@ -30,14 +31,15 @@ students typically make in the topic.
 
 ## Privacy
 
-The page is one HTML file. It runs in the browser and sends nothing anywhere. Entries are stored only in the
-browser of the person using it (local storage) and can be removed with the reset button or by clearing the browser data.
-The only external request is an optional web font. Without it the page uses a default font.
+The page is one HTML file. It runs in the browser and sends nothing anywhere. It makes no external requests and uses the
+fonts of the device. Entries are stored only in the browser of the person using it (local storage) and can be removed with the
+button "Start empty" or by clearing the browser data. "Save to file" writes a copy of the entries to the device of the person using it.
 
 ## Browsers and devices
 
-Tested so far in Chromium (Chrome and Edge engine) on desktop and at phone width, including opening the file
-without an internet connection. Safari and Firefox have not been tested yet.
+Checked in Chromium (Chrome and Edge engine) on desktop and at phone width, including opening the file without an internet
+connection. Two AI-assisted reviews on 22 November 2026 also ran it in Edge, Chrome, Firefox and WebKit and led to the fixes listed in
+[docs/review-log.md](docs/review-log.md). Safari on a Mac or iPhone, touch devices and screen readers have not been tested.
 
 ## Status
 
@@ -53,9 +55,11 @@ the lecturer guide of the thesis. The thesis is the authoritative source.
 
 ## Roadmap
 
-- Shorter start page and plainer wording.
-- Save and load of the entries as a file, and a download of the specification as a Word file.
-- Accessibility check and tests in more browsers.
+- Download of the specification as a Word file.
+- A complete example, fewer boxes per card and a check that the design is complete.
+- Step 5 for reflective designs.
+- A decision whether the specification needs a second version written directly for a chatbot.
+- Accessibility check with a screen reader and tests in Safari.
 - Evaluation in walkthrough sessions with lecturers, as planned in the thesis.
 
 ## Use of AI

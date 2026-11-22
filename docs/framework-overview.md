@@ -9,7 +9,7 @@ The text of the cards in the prototype follows the lecturer guide of the thesis.
 2. **Learner situation analysis.** What do students already know, which misconceptions are typical, and which teaching method fits? (GC-02, GC-03)
 3. **Conversation role selection.** Which role does the chatbot take? (GC-04)
 4. **Dialogue flow design.** In which order does the conversation run? (GC-05 to GC-09)
-5. **Feedback and repair planning.** What happens after a correct, incorrect, misconceived or unclear answer? (GC-10 to GC-13)
+5. **Feedback and repair planning.** What happens after a correct, incorrect, misconceived or unclear answer? (GC-12, and GC-07, GC-10, GC-11, GC-13. GC-07 is chosen in step 4 and applies here again.)
 6. **Boundary definition.** What does the chatbot refuse, and where does it send students? (GC-14)
 7. **Review.** Is the design ready to be used? (checklist)
 

@@ -18,7 +18,11 @@ You can also download `index.html` from this repository and open it by double cl
 Two buttons are at the top right.
 
 - **Load example** fills in a constructed example about modelling a process in BPMN. Use it to see how a finished design looks.
-- **Start empty** clears all entries. Both buttons ask for a second click before they replace anything.
+- **Save to file** writes your entries to a small file on your computer. Do this before you close the page for the last time.
+- **Load from file** reads a file saved with the button before. A file from another source is rejected.
+- **Start empty** clears all entries.
+
+Load example, Load from file and Start empty ask you to confirm whenever you have entered anything, so that your work is not replaced by accident.
 
 ## The seven steps
 
@@ -28,7 +32,7 @@ Two buttons are at the top right.
 | 2 Learner situation | What do students know, which misconceptions are typical, which teaching method fits? | GC-02, GC-03 |
 | 3 Role | Which role does the chatbot take? | GC-04 |
 | 4 Dialogue flow | In which order does the conversation run? | GC-05 to GC-09 |
-| 5 Feedback and repair | What happens after a correct, incorrect, misconceived or unclear answer? | GC-10 to GC-13 |
+| 5 Feedback and repair | What happens after a correct, incorrect, misconceived or unclear answer? | GC-12, GC-07, GC-10, GC-11, GC-13 |
 | 6 Boundaries | What does the chatbot refuse and where does it send students? | GC-14 |
 | 7 Review | Is the design ready to be used? | Checklist |
 
@@ -39,7 +43,7 @@ selection matrix recommends. Nothing is ticked without a click.
 ## The specification
 
 The last page shows the specification with the conversation order, the cards you chose and your values.
-Missing items are listed above it. Copy the text and keep it as a document. Update it when your course changes.
+Missing items are listed above it. Copy the text or download it as a text file and keep it as a document. Update it when your course changes.
 
 ## Tips
 
@@ -53,7 +57,7 @@ Missing items are listed above it. Copy the text and keep it as a document. Upda
 **Does the page build a chatbot?** No. It produces a specification. A developer, or you, can use it to build or prompt a chatbot.
 
 **Where are my entries stored?** Only in your browser on this device. They are not sent anywhere. Clearing the browser data removes them.
-Copy the specification before you close the page for the last time.
+If the browser cannot store them, the page shows a notice. Use "Save to file" to keep a copy. If you open the page in two tabs, the page warns you that the other tab changed the entries.
 
 **Can I use it on a phone?** Yes, but a larger screen is easier for the text boxes.
 

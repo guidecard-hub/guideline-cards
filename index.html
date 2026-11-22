@@ -1,23 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guideline Cards Prototype</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Layout: step bar on top, one working panel, cards of the current stage below it. Core cards carry a dark border, as in Figures 1 and 2 of the guide. */
 :root{
   --bg:#f4f6f8; --surface:#ffffff; --fg:#17212b; --muted:#5a6672; --line:#d5dbe1; --line-strong:#17212b;
   --accent:#0d6a72; --accent-soft:#dcefef; --accent-fg:#ffffff; --warn:#8a5a00; --warn-soft:#fbefd2;
-  --ok:#17663a; --field:#fbfcfd;
-  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
-  --font-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --ok:#17663a; --field:#fbfcfd; --ctl:#7a8794;
+  --font-body:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f161c; --surface:#17212a; --fg:#e8edf1; --muted:#9aa7b2; --line:#2b3945; --line-strong:#e8edf1;
   --accent:#58c2c9; --accent-soft:#16363a; --accent-fg:#06262a; --warn:#f0c46a; --warn-soft:#3a2e12;
-  --ok:#6fd49a; --field:#101920; color-scheme:dark}}
+  --ok:#6fd49a; --field:#101920; --ctl:#7f909d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f161c; --surface:#17212a; --fg:#e8edf1; --muted:#9aa7b2; --line:#2b3945; --line-strong:#e8edf1;
   --accent:#58c2c9; --accent-soft:#16363a; --accent-fg:#06262a; --warn:#f0c46a; --warn-soft:#3a2e12;
-  --ok:#6fd49a; --field:#101920; color-scheme:dark}
+  --ok:#6fd49a; --field:#101920; --ctl:#7f909d; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
@@ -42,7 +45,7 @@ nav.steps button[aria-current="step"].done::after{color:inherit}
 .q{font-size:16px;margin:0;color:var(--fg)}
 .hint{margin:0;color:var(--muted);font-size:13px}
 label{display:block;font-weight:500;font-size:13px;margin-bottom:4px}
-textarea,input[type=text],select{width:100%;font:inherit;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+textarea,input[type=text],select{width:100%;font:inherit;color:var(--fg);background:var(--field);border:1px solid var(--ctl);border-radius:6px;padding:8px 10px}
 textarea{min-height:76px;resize:vertical}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -51,7 +54,8 @@ textarea{min-height:76px;resize:vertical}
 .matrix{display:grid;gap:8px}
 .mrow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;cursor:pointer;background:var(--field)}
 .mrow.sel{border-color:var(--accent);background:var(--accent-soft)}
-.mrow.off{opacity:.6;cursor:default}
+.mrow.off{cursor:default}
+.mrow.off b,.mrow.off small{color:var(--muted)}
 .mrow b{font-weight:600}
 .mrow small{display:block;color:var(--muted);margin-top:2px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
@@ -75,7 +79,19 @@ details.card[open] summary::before{content:"\25BE"}
 .cbody p{margin:0}
 .ex{font-style:italic;color:var(--muted)}
 .use{margin-left:auto;display:flex;gap:6px;align-items:center;font-weight:500;font-size:13px}
-.use input{width:auto}
+.use input{width:20px;height:20px;margin:0}
+.use{min-height:28px}
+.cardwrap{position:relative}
+.cardwrap.hasuse>.use{position:absolute;right:12px;top:8px;z-index:1}
+.cardwrap.hasuse details.card summary{padding-right:150px}
+@media (max-width:640px){.cardwrap.hasuse{display:flex;flex-direction:column}.cardwrap.hasuse details.card summary{padding-right:12px}.cardwrap.hasuse details.card{border-radius:6px 6px 0 0}.cardwrap.hasuse>.use{position:static;order:2;align-self:stretch;margin-left:0;border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;background:var(--surface);padding:8px 12px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.notice{margin:10px 0;padding:10px 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--warn-soft);color:var(--fg);font-size:14px}
+.notice button{margin-left:6px}
+.startrow{margin:14px 0 4px}
+details.more{margin:14px 0;border-top:1px solid var(--line)}
+details.more>summary{cursor:pointer;padding:12px 0;font-weight:600;color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .checks{display:grid;gap:8px}
 .chk{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px;margin:0}
 .chk input{width:auto;margin-top:4px}
@@ -120,7 +136,11 @@ button[data-tickrec]{margin-left:6px;padding:3px 10px;font-size:13px}
 .pc{display:grid;gap:3px;min-width:0}.pl{display:none;font-size:12px;color:var(--muted)}
 @media (max-width:640px){.pl{display:block}}
 .pc textarea{min-height:56px}
+@media (max-width:640px){nav.steps{flex-wrap:nowrap;overflow-x:auto}header .tools{gap:6px}header .tools button{padding:6px 10px;font-size:14px}h1{font-size:20px}header .sub{font-size:13px}}
 </style>
+</head>
+<body>
+
 
 <div class="wrap">
 <header>
@@ -130,9 +150,14 @@ button[data-tickrec]{margin-left:6px;padding:3px 10px;font-size:13px}
   </div>
   <div class="tools">
     <button id="btn-example" type="button">Load example</button>
+    <button id="btn-save" type="button">Save to file</button>
+    <button id="btn-load" type="button">Load from file</button>
+    <input type="file" id="file-in" accept=".json,application/json" hidden>
     <button id="btn-reset" type="button">Start empty</button>
   </div>
 </header>
+<div id="live" class="sr" role="status" aria-live="polite"></div>
+<div id="notice" class="notice" role="status" hidden></div>
 <nav class="steps" id="stepbar" aria-label="Steps"></nav>
 <main id="main"></main>
 </div>
@@ -187,7 +212,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 function pairs(t){return String(t).split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf('|');return i<0?{a:x,b:''}:{a:x.slice(0,i).trim(),b:x.slice(i+1).trim()}})}
 let S=load();
 function load(){try{const t=localStorage.getItem(KEY);if(t){const o=JSON.parse(t);['misc','bound'].forEach(k=>{if(typeof o[k]==='string')o[k]=pairs(o[k])});return Object.assign(clone(EMPTY),o)}}catch(e){}return clone(EMPTY)}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(typeof hideNotice==='function')hideNotice('save')}catch(e){if(typeof showNotice==='function'){showNotice('Your entries could not be saved in this browser, so they will be lost when you close or reload the page. Use “Save to file” to keep them.','warn');notice.dataset.k='save'}}}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const row=()=>S.row>=0?ROWS[S.row]:null;
 const isReflective=()=>!!(row()&&row().reflective);
@@ -213,11 +238,11 @@ function cardHtml(c){
   const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
   const v=S.vals[c.id]||{};
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
-  const status=used?(fieldsFilled(c.id)?'<span class="badge ok">Fields filled in</span>':'<span class="badge todo">Fill in the instance fields</span>'):'';
+  const status=used?(fieldsFilled(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
-  const use=c.core?'<span class="use note">Used in every design</span>':`<label class="use" for="use-${c.id}" onclick="event.stopPropagation()"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
+  const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
-  return `<details class="card ${c.core?'core':''}" data-card="${c.id}" ${open?'open':''}><summary><span class="gc">${c.id}</span><strong>${esc(c.name)}</strong>${badges}${use}</summary><div class="cbody">
+  return `<div class="cardwrap ${c.core?'':'hasuse'}">${useBox}<details class="card ${c.core?'core':''}" data-card="${c.id}" ${open?'open':''}><summary><span class="gc">${c.id}</span><strong>${esc(c.name)}</strong>${badges}${useNote}</summary><div class="cbody">
   <p><b>Use it when:</b> ${esc(c.when)}</p>
   <p><b>What the chatbot does:</b> ${esc(c.does)}</p>
   ${c.ex?`<p class="ex">“${esc(c.ex)}”</p>`:''}
@@ -228,14 +253,14 @@ function cardHtml(c){
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
    <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
    <div class="row"><label for="no-${c.id}">Course notes</label><textarea id="no-${c.id}" data-val="${c.id}|no" placeholder="Your remarks, for example why you adapted the card">${esc(v.no||'')}</textarea></div></div>`:''}
-  </div></details>`}
+  </div></details></div>`}
 function cardsFor(stage){
   const cs=CARDS.filter(c=>c.stage===stage);
   const todo=cs.filter(c=>!c.core&&recommended().includes(c.id)&&cardFit(c)&&!S.used[c.id]);
-  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it and to fill in its three instance fields. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three instance fields.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
+  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it and to fill in its three course detail boxes. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three course detail boxes.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
 const EX_HINT={objective:'Example (BPMN modelling course): Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'Example (BPMN modelling course): The students model the order process themselves, step by step.'};
 
-function render(){
+function renderInner(){
   document.getElementById('stepbar').innerHTML=`<button type="button" data-go="-1" ${S.step===-1?'aria-current="step"':''}>Start here</button>`+STEPNAMES.map((n,i)=>`<button type="button" data-go="${i}" ${i===S.step?'aria-current="step"':''} class="${done(i)?'done':''}"><span class="n">${i<7?i+1:'&#8594;'}</span>${n}</button>`).join('');
   const i=S.step;let h='';
   if(i===-1)h=introHtml();
@@ -287,7 +312,7 @@ function render(){
    h=`<h2>Conversation design specification</h2><p class="q">The completed worksheet, the cards you selected with the values for your course, and the order of the conversation.</p>
    <p class="hint">It describes what the chatbot should do and does not depend on a particular chatbot tool. You can hand it to whoever sets up the chatbot.</p>
    ${m.length?`<div class="warn"><b>Not yet filled in:</b><ul class="missing">${m.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'<div class="box">All steps and instance fields are filled in.</div>'}
-   <div class="tools"><button type="button" class="primary" id="copy">Copy specification</button><span class="note" id="copied" role="status"></span></div>
+   <div class="tools"><button type="button" class="primary" id="copy">Copy specification</button><button type="button" id="dl-txt">Download as text file</button><span class="note" id="copied" role="status"></span></div>
    <pre id="spec" tabindex="0">${esc(spec())}</pre>`}
   document.getElementById('main').innerHTML=`<section class="panel">${h}<div class="nav">${i>-1?`<button type="button" data-go="${i-1}">Previous</button>`:'<span></span>'}${i<7?`<button type="button" class="primary" data-go="${i+1}">${i===-1?'Start with step 1':i===6?'Show specification':'Next'}</button>`:''}</div></section>`;
 }
@@ -297,7 +322,7 @@ function introHtml(){
   ['Learner situation analysis','What do students already know, which misconceptions are typical, and which teaching method fits?',['GC-02*','GC-03']],
   ['Conversation role selection','Which role does the chatbot take?',['GC-04*']],
   ['Dialogue flow design','In which order does the conversation run?',['GC-05','GC-06','GC-07','GC-08','GC-09']],
-  ['Feedback and repair planning','What happens after a correct, incorrect, misconceived or unclear answer?',['GC-12*','GC-10','GC-11','GC-13']],
+  ['Feedback and repair planning','What happens after a correct, incorrect, misconceived or unclear answer?',['GC-12*','GC-07','GC-10','GC-11','GC-13']],
   ['Boundary definition','What does the chatbot refuse, and where does it send students?',['GC-14*']],
   ['Review','Is the design ready to be used?',['Checklist']]];
  const chip=c=>c.endsWith('*')?`<span class="tag core">${c.slice(0,-1)}</span>`:`<span class="tag">${c}</span>`;
@@ -308,10 +333,12 @@ function introHtml(){
   <div class="fact"><b>What you do</b><p>Answer one question in each of seven steps. In every step, guideline cards (GC) tell you what to decide.</p></div>
   <div class="fact"><b>What you get</b><p>A completed worksheet that you can copy as text: the conversation order, the cards you chose and the values for your course.</p></div>
  </div>
+ <div class="tools startrow"><button type="button" class="primary" data-go="0">Start with step 1</button><button type="button" data-example="1">Try it with the example first</button></div>
  <h3>The seven steps</h3>
  <p class="hint">Select a step to jump to it. The cards shown for each step are the rules you will meet there.</p>
  <ol class="flow">${FL.map((s,k)=>`<li><button type="button" data-go="${k}"><span class="num">${k+1}</span><span><span class="nm">${s[0]}</span><span class="qq">${s[1]}</span></span><span class="cs">${s[2].map(chip).join('')}</span></button></li>`).join('')}</ol>
  <div class="legend"><span><span class="tag core">GC-01</span> Core card. You use it in every design.</span><span><span class="tag">GC-03</span> Selectable card. The selection matrix in step 2 recommends it or not.</span></div>
+ <details class="more"><summary>Read more: how the cards work, an example conversation and the terms</summary>
  <h3>How the cards work</h3>
  <p>The framework has 14 guideline cards (GC-01 to GC-14). Each card is a short rule for one move of the chatbot, for example how it opens, how it gives a hint or how it refuses a request. A card says when to use it, what the chatbot does, its limits and what you decide. Five cards are core cards and apply in every design. The other nine are selectable, and you choose them with the selection matrix.</p>
  <h3>What a conversation looks like</h3>
@@ -326,9 +353,9 @@ function introHtml(){
   <dt>Role</dt><dd>${ROLES.map(k=>`<b>${k}.</b> ${ROLEDESC[k]}`).join(' ')} You choose one in step 3.</dd>
   <dt>Misconception</dt><dd>A mistake that students typically make in this topic.</dd>
   <dt>Counterexample</dt><dd>A case in which the wrong belief does not hold. The chatbot uses it to make students rethink.</dd>
-  <dt>Instance fields</dt><dd>The three boxes you fill in for every card you use: an example in your course, the values you chose and your notes.</dd>
+  <dt>Course details</dt><dd>The three boxes you fill in for every card you use: an example in your course, the values you chose and your notes. The thesis calls them instance fields.</dd>
  </dl>
- <div class="tools"><button type="button" data-example="1">Try it with the example first</button></div>
+ </details>
  <p class="note">Based on the lecturer guide of a master thesis at the FHNW School of Business. The descriptions of roles and teaching methods come from the framework document. This is a prototype. Your entries stay in this browser and are not sent anywhere. The example is a constructed scenario, not a tested chatbot design.</p>`}
 function missing(){const m=[];
  if(!S.objective.trim())m.push('Step 1: learning objective');if(!S.activity.trim())m.push('Step 1: student activity');
@@ -340,7 +367,7 @@ function missing(){const m=[];
  if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer');
  if(!filled('bound').length)m.push('Step 6: requests outside the role');
  const nc=CARDS.filter(c=>isUsed(c)&&!fieldsFilled(c.id)).map(c=>c.id);
- if(nc.length)m.push('Instance fields for '+nc.join(', ')+' (open the card in its step)');
+ if(nc.length)m.push('Course details for '+nc.join(', ')+' (open the card in its step)');
  const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
  return m}
 function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(v||'').trim()||'(not filled in)')+'\n');
@@ -363,21 +390,47 @@ function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(
  return L.join('\n')}
 
 const main=document.getElementById('main');
+function render(nav){const a=document.activeElement;const id=a&&a.id;const ss=a&&a.selectionStart,se=a&&a.selectionEnd;
+  renderInner();
+  if(nav){const h=main.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}
+  else if(id){const n=document.getElementById(id);if(n){n.focus({preventScroll:true});try{if(ss!=null)n.setSelectionRange(ss,se)}catch(x){}}}}
+const live=document.getElementById('live'),notice=document.getElementById('notice');
+function say(t){live.textContent='';setTimeout(()=>{live.textContent=t},30)}
+function showNotice(html,kind){notice.className='notice '+(kind||'');notice.innerHTML=html;notice.hidden=false}
+function hideNotice(k){if(!notice.hidden&&(!k||notice.dataset.k===k)){notice.hidden=true;notice.innerHTML='';notice.dataset.k=''}}
 let armed=null;
-function arm(btn,label,fn){if(armed===btn.id){armed=null;fn();return}armed=btn.id;btn.dataset.orig=btn.textContent;btn.textContent=label;setTimeout(()=>{if(armed===btn.id){armed=null;btn.textContent=btn.dataset.orig}},4000)}
-const hasContent=()=>!!(S.objective||S.activity||S.opening||S.order||filled('misc').length||filled('bound').length);
+function arm(btn,label,fn){if(armed===btn.id){armed=null;fn();return}armed=btn.id;btn.dataset.orig=btn.textContent;btn.textContent=label;say(label);setTimeout(()=>{if(armed===btn.id){armed=null;btn.textContent=btn.dataset.orig}},4000)}
+const sig=o=>JSON.stringify(Object.assign({},o,{step:0,open:''}));
+const EXSTATE=()=>Object.assign(clone(EMPTY),clone(EXAMPLE));
+const changed=()=>sig(S)!==sig(EMPTY);
 document.addEventListener('click',e=>{
-  const g=e.target.closest('[data-go]');if(g){S.step=+g.dataset.go;S.open='';save();render();window.scrollTo({top:0});return}
+  const g=e.target.closest('[data-go]');if(g){S.step=+g.dataset.go;S.open='';save();render(true);window.scrollTo({top:0});return}
   const ex=e.target.closest('[data-example]');if(ex){document.getElementById('btn-example').click();return}
   const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1});save();render();return}
   const pa=e.target.closest('[data-padd]');if(pa){const k=pa.dataset.padd;if(!S[k].length)S[k].push({a:'',b:''});S[k].push({a:'',b:''});save();render();return}
   const pr=e.target.closest('[data-prm]');if(pr){const[k,i]=pr.dataset.prm.split('|');S[k].splice(+i,1);save();render();return}
+  if(e.target.id==='dl-txt'){const t='\ufeff'+document.getElementById('spec').textContent.replace(/\r?\n/g,'\r\n');dl(t,'text/plain;charset=utf-8','conversation-design-specification.txt');return}
   if(e.target.id==='copy'){const t=document.getElementById('spec').textContent;const ok=()=>{document.getElementById('copied').textContent='Copied.'};
     const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('spec'));const s=getSelection();s.removeAllRanges();s.addRange(r);document.getElementById('copied').textContent='Selected. Press Ctrl+C to copy.'};
     try{navigator.clipboard.writeText(t).then(ok,fb)}catch(x){fb()}}
 });
-document.getElementById('btn-example').onclick=function(){const go=()=>{S=Object.assign(clone(EMPTY),clone(EXAMPLE));save();render();window.scrollTo({top:0})};if(hasContent()&&S.objective!==EXAMPLE.objective)arm(this,'Click again to replace your entries',go);else go()};
-document.getElementById('btn-reset').onclick=function(){const go=()=>{S=clone(EMPTY);save();render();window.scrollTo({top:0})};if(hasContent())arm(this,'Click again to delete your entries',go);else go()};
+document.getElementById('btn-example').onclick=function(){const go=()=>{S=EXSTATE();save();render(true);window.scrollTo({top:0})};if(changed()&&sig(S)!==sig(EXSTATE()))arm(this,'Click again to replace your entries',go);else go()};
+document.getElementById('btn-reset').onclick=function(){const go=()=>{S=clone(EMPTY);save();render(true);window.scrollTo({top:0})};if(changed())arm(this,'Click again to delete your entries',go);else go()};
+function dl(text,type,name){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function normalize(o){const s=Object.assign(clone(EMPTY),o);['misc','bound'].forEach(k=>{if(typeof s[k]==='string')s[k]=pairs(s[k]);if(!Array.isArray(s[k]))s[k]=[]});['used','vals','omit','checks','tests'].forEach(k=>{if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k]))s[k]={}});return s}
+document.getElementById('btn-save').onclick=function(){const d=new Date().toISOString();dl(JSON.stringify({app:'guideline-cards-prototype',version:2,savedAt:d,state:S},null,1),'application/json','guideline-cards-design-'+d.slice(0,10)+'.json');say('Saved as a file in your downloads folder.')};
+const fileIn=document.getElementById('file-in');
+document.getElementById('btn-load').onclick=()=>fileIn.click();
+let pending=null;
+fileIn.onchange=function(){const f=fileIn.files[0];fileIn.value='';if(!f)return;const r=new FileReader();r.onload=()=>{let o;try{o=JSON.parse(r.result)}catch(x){o=null}
+  if(!o||o.app!=='guideline-cards-prototype'||!o.state||typeof o.state!=='object'){showNotice('This file is not a design saved by this page. Nothing was changed.','warn');notice.dataset.k='load';return}
+  pending=normalize(o.state);pending.step=0;
+  if(changed()){showNotice('Loading this file replaces your current entries. <button type="button" id="load-ok">Replace my entries</button> <button type="button" id="load-no">Cancel</button>','warn');notice.dataset.k='load';say('Loading this file replaces your current entries.')}
+  else{S=pending;pending=null;save();render(true);window.scrollTo({top:0})}};r.onerror=()=>{showNotice('The file could not be read. Nothing was changed.','warn')};r.readAsText(f)};
+notice.addEventListener('click',e=>{if(e.target.id==='load-ok'&&pending){S=pending;pending=null;hideNotice();save();render(true);window.scrollTo({top:0})}
+  else if(e.target.id==='load-no'){pending=null;hideNotice()}
+  else if(e.target.id==='reload'){location.reload()}});
+window.addEventListener('storage',e=>{if(e.key===KEY){showNotice('Your entries were changed in another tab of this page. <button type="button" id="reload">Reload to see them</button> If you keep typing here, the other tab’s changes are overwritten.','warn');notice.dataset.k='tab'}});
 main.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.f){S[t.dataset.f]=t.value;save();refreshDone();return}
   if(t.dataset.pl){const[k,i,f]=t.dataset.pl.split('|');while(S[k].length<=+i)S[k].push({a:'',b:''});S[k][+i][f]=t.value;save();refreshDone();return}
@@ -393,3 +446,5 @@ main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card
 function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
 render();
 </script>
+</body>
+</html>
