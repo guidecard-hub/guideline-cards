@@ -29,6 +29,7 @@ The findings below are grouped by what was done. Findings were checked against t
 | The specification could only be copied. | It can also be downloaded as a text file. |
 | Card boxes repeated answers from earlier steps. | Cards for GC-04, GC-05, GC-11 and GC-14 show the earlier content in a linked block with an edit button. The boxes are for what is new. |
 | The buttons "Start empty" and "Load example" changed their label for 4 seconds and then switched back, which was confusing. The label could also stay stuck. | Both now show a message under the buttons that stays until you choose "Delete my entries" (or "Replace my entries") or "Cancel". Escape cancels. The message tells you to use Save to file first. |
+| Every card asked for three boxes, and many repeated an earlier answer (45 percent of the typed text in the AI time tests). | Each card has one box "Your decision". The example from the course and the notes are optional and sit behind a link. GC-10 starts with its default of two hints. The badge in the card header updates while typing. |
 | Ticking cards closed the other open cards. | Open cards stay open when the page updates. |
 | On steps 3, 4 and 6 a card said "Nothing written in step N yet" while the lecturer was in that step, and the block did not update while typing. | On the same step the card shows a short note that it uses the answer above. The block "Taken from step N" stays for GC-11, whose content comes from step 2. |
 | The checkbox "Use this card" had no card name for screen readers. | The name now includes the card id and title. |

@@ -46,11 +46,11 @@ These are checks of correctness by the author and AI assistants. They are not a 
 
 - Not tested in Safari on a Mac or iPhone, on touch hardware or with a screen reader.
 - Accessibility was checked with automated tools by the reviewers, not with assistive technology.
-- Each card asks for three boxes, and several repeat answers from earlier steps. A lecturer may not finish them in one session.
+- A full design may take longer than 60 minutes. Three AI time tests on 23 November 2026 estimated 69 to 150 minutes for a lecturer (estimates, not measurements with lecturers). The study plans 60 to 90 minutes and a preparation by the lecturer.
 - The page does not check that a design is complete in context, for example both sides of a pair.
 - The specification can be copied or saved as a text file. A Word file is not available yet.
 - The specification is written as a design document. It has not been tested systematically with different chatbots.
-- The page uses the thesis term "instance fields" only in the explanation of the term. The interface says "course details".
+- The page uses the thesis term "instance fields" only in the explanation of the term. The interface says "your decision" for the card box and explains the term.
 
 ## Plan
 

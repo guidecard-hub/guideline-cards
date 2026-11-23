@@ -36,11 +36,10 @@ Load example, Load from file and Start empty ask you to confirm whenever you hav
 | 6 Boundaries | What does the chatbot refuse and where does it send students? | GC-14 |
 | 7 Review | Is the design ready to be used? | Checklist |
 
-In steps 2 to 6 you open the cards of the step. Each card has three boxes to fill in: an example in your course,
-the values you chose, and your notes. The button "Use all recommended cards of this step" ticks the cards that the
+In steps 2 to 6 you open the cards of the step. Each card has one box for your decision. You can also add an example from your course and a note, but you do not have to. The button "Use all recommended cards of this step" ticks the cards that the
 selection matrix recommends. Nothing is ticked without a click.
 
-You do not write anything twice. If a card needs content that you already wrote in an earlier step (the role and opening sentence for GC-04, the steps of the task for GC-05, the misconceptions for GC-11, the contacts for GC-14), the card shows it in a block "Taken from step N" with a button to edit it there. If that step is still empty, the card shows a warning instead. On the same step the card only reminds you that it uses your answer above. The three boxes are for what is new in the card. GC-02 has no boxes because the teaching method is chosen at design time.
+You do not write anything twice. If a card needs content that you already wrote in an earlier step (the role and opening sentence for GC-04, the steps of the task for GC-05, the misconceptions for GC-11, the contacts for GC-14), the card shows it in a block "Taken from step N" with a button to edit it there. If that step is still empty, the card shows a warning instead. On the same step the card only reminds you that it uses your answer above. The decision box is for what is new in the card. GC-02 has no boxes because the teaching method is chosen at design time.
 
 ## Step 7 Review
 

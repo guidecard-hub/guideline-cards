@@ -66,10 +66,10 @@ textarea{min-height:76px;resize:vertical}
 h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:8px 0 0;font-weight:600}
 details.card{border:1px solid var(--line);border-radius:6px;background:var(--surface)}
 details.card.core{border:2px solid var(--line-strong)}
-details.card summary{cursor:pointer;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;list-style:none}
-details.card summary::-webkit-details-marker{display:none}
-details.card summary::before{content:"\25B8";color:var(--muted)}
-details.card[open] summary::before{content:"\25BE"}
+details.card>summary{cursor:pointer;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;list-style:none}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"\25B8";color:var(--muted)}
+details.card[open]>summary::before{content:"\25BE"}
 .gc{font-family:var(--font-mono);font-weight:500}
 .badge{font-size:11px;border-radius:10px;padding:1px 8px;border:1px solid var(--line);color:var(--muted)}
 .badge.core{border-color:var(--line-strong);color:var(--fg);font-weight:600}
@@ -83,13 +83,19 @@ details.card[open] summary::before{content:"\25BE"}
 .use{min-height:28px}
 .cardwrap{position:relative}
 .cardwrap.hasuse>.use{position:absolute;right:12px;top:8px;z-index:1}
-.cardwrap.hasuse details.card summary{padding-right:150px}
-@media (max-width:640px){.cardwrap.hasuse{display:flex;flex-direction:column}.cardwrap.hasuse details.card summary{padding-right:12px}.cardwrap.hasuse details.card{border-radius:6px 6px 0 0}.cardwrap.hasuse>.use{position:static;order:2;align-self:stretch;margin-left:0;border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;background:var(--surface);padding:8px 12px}}
+.cardwrap.hasuse details.card>summary{padding-right:150px}
+@media (max-width:640px){.cardwrap.hasuse{display:flex;flex-direction:column}.cardwrap.hasuse details.card>summary{padding-right:12px}.cardwrap.hasuse details.card{border-radius:6px 6px 0 0}.cardwrap.hasuse>.use{position:static;order:2;align-self:stretch;margin-left:0;border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;background:var(--surface);padding:8px 12px}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .notice{margin:10px 0;padding:10px 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--warn-soft);color:var(--fg);font-size:14px}
 .notice button{margin-left:6px}
 .startrow{margin:14px 0 4px}
 details.more{margin:14px 0;border-top:1px solid var(--line)}
+.decision textarea.short{min-height:44px}
+details.opt{margin-top:8px}
+details.opt>summary{cursor:pointer;padding:6px 0;font-size:14px;color:var(--accent);list-style:none}
+details.opt>summary::-webkit-details-marker{display:none}
+details.opt>summary::before{content:"\25B8\00a0";color:var(--muted)}
+details.opt[open]>summary::before{content:"\25BE\00a0"}
 details.more>summary{cursor:pointer;padding:12px 0;font-weight:600;color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .checks{display:grid;gap:8px}
@@ -245,6 +251,9 @@ function cardFit(c){return c.roles==='all'||!S.role||c.roles.includes(S.role)}
 function isUsed(c){return !!c.core||!!S.used[c.id]}
 const filled=k=>S[k].filter(p=>p.a.trim());
 const needsBoxes=c=>c.id!=='GC-02';
+const SHORT=['GC-08','GC-09','GC-10','GC-11','GC-12'];
+const PH={'GC-11':'Number of unsuccessful attempts before a worked example'};
+function defaults(id){if(id==='GC-10'){const v=S.vals[id]=S.vals[id]||{};if(!(v.va||'').trim())v.va='Two hints per step, then a worked example.'}}
 const pairsText=(k,sep)=>filled(k).map(p=>'- '+p.a+(p.b?sep+p.b:'')).join('\n');
 const LINKS={
  'GC-04':{n:3,what:'the role and the opening sentence',get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
@@ -271,7 +280,7 @@ function cardHtml(c){
   const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
   const v=S.vals[c.id]||{};
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
-  const status=used&&needsBoxes(c)?(detailsDone(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
+  const status=used&&needsBoxes(c)?(detailsDone(c.id)?'<span class="badge status ok">Decision filled in</span>':'<span class="badge status todo">Write your decision</span>'):'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
   const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" aria-label="Use this card, ${c.id} ${esc(c.name)}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
@@ -282,17 +291,17 @@ function cardHtml(c){
   <p><b>Limits:</b> ${esc(c.limits)}</p>
   <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
   ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
-  ${used&&!needsBoxes(c)?'<p class="note">This card needs no boxes. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
-  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();if(S.step===L.n-1)return `<p class="linked same note">This card uses your answer in this step (${L.what}). You do not need to write it again. Use the boxes below only for what is new.</p>`;return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Use the boxes below only for what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
-  ${used&&needsBoxes(c)?`<div class="grid3">
+  ${used&&!needsBoxes(c)?'<p class="note">This card needs no decision box. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
+  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();if(S.step===L.n-1)return `<p class="linked same note">This card uses your answer in this step (${L.what}). You do not need to write it again. Write in the decision box below only what is new.</p>`;return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Write in the decision box below only what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
+  ${used&&needsBoxes(c)?`<div class="decision"><div class="row"><label for="va-${c.id}">Your decision</label><textarea id="va-${c.id}" class="${SHORT.includes(c.id)?'short':''}" data-val="${c.id}|va" placeholder="${esc(PH[c.id]||c.decide)}">${esc(v.va||'')}</textarea></div>
+   <details class="opt" ${(v.ex||v.no)?'open':''}><summary>Add an example from your course or a note (optional)</summary><div class="grid2">
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
-   <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
-   <div class="row"><label for="no-${c.id}">Course notes</label><textarea id="no-${c.id}" data-val="${c.id}|no" placeholder="Your remarks, for example why you adapted the card">${esc(v.no||'')}</textarea></div></div>`:''}
+   <div class="row"><label for="no-${c.id}">Course notes</label><textarea id="no-${c.id}" data-val="${c.id}|no" placeholder="Your remarks, for example why you adapted the card">${esc(v.no||'')}</textarea></div></div></details></div>`:''}
   </div></details></div>`}
 function cardsFor(stage){
   const cs=CARDS.filter(c=>c.stage===stage);
   const todo=cs.filter(c=>!c.core&&recommended().includes(c.id)&&cardFit(c)&&!S.used[c.id]);
-  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it. When a card is ticked, its three course detail boxes appear inside it. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three course detail boxes.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
+  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it. When a card is ticked, a box for your decision appears inside it. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to write your decision.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
 const EX_HINT={objective:'Example (BPMN modelling course): Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'Example (BPMN modelling course): The students model the order process themselves, step by step.'};
 
 function renderInner(){
@@ -393,7 +402,7 @@ function introHtml(){
   <dt>Role</dt><dd>${ROLES.map(k=>`<b>${k}.</b> ${ROLEDESC[k]}`).join(' ')} You choose one in step 3.</dd>
   <dt>Misconception</dt><dd>A mistake that students typically make in this topic.</dd>
   <dt>Counterexample</dt><dd>A case in which the wrong belief does not hold. The chatbot uses it to make students rethink.</dd>
-  <dt>Course details</dt><dd>The three boxes you fill in for every card you use: an example in your course, the values you chose and your notes. The thesis calls them instance fields.</dd>
+  <dt>Course details</dt><dd>The decision that you write in every card you use. You can add an example from your course and a note, but you do not have to. The thesis calls them instance fields.</dd>
  </dl>
  </details>
  <p class="note">Based on the lecturer guide of a master thesis at the FHNW School of Business. The descriptions of roles and teaching methods come from the framework document. This is a prototype. Your entries stay in this browser and are not sent anywhere. The example is a constructed scenario, not a tested chatbot design.</p>`}
@@ -407,7 +416,7 @@ function missing(){const m=[];
  else{if(!S.r_misc.trim())m.push('Step 5: response to a listed misconception');if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer')}
  if(!filled('bound').length)m.push('Step 6: requests outside the role');
  const nc=CARDS.filter(c=>isUsed(c)&&needsBoxes(c)&&!detailsDone(c.id)).map(c=>c.id);
- if(nc.length)m.push('Course details for '+nc.join(', ')+' (open the card in its step)');
+ if(nc.length)m.push('Your decision for '+nc.join(', ')+' (open the card in its step)');
  const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
  const nt2=(isReflective()?TESTS_REFL:TESTS_TASK).filter((_,k)=>!S.tests[k]).length;if(nt2)m.push(`Step 7: ${nt2} test input${nt2>1?'s':''} not ticked yet`);
  return m}
@@ -468,7 +477,7 @@ const changed=()=>sig(S)!==sig(EMPTY);
 document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]');if(g){S.step=+g.dataset.go;S.open='';save();render(true);window.scrollTo({top:0});return}
   const ex=e.target.closest('[data-example]');if(ex){document.getElementById('btn-example').click();return}
-  const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1});save();render();return}
+  const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1;defaults(c.id)});save();render();return}
   const pa=e.target.closest('[data-padd]');if(pa){const k=pa.dataset.padd;if(!S[k].length)S[k].push({a:'',b:''});S[k].push({a:'',b:''});save();render();return}
   const pr=e.target.closest('[data-prm]');if(pr){const[k,i]=pr.dataset.prm.split('|');S[k].splice(+i,1);save();render();return}
   if(e.target.id==='dl-txt'){const t='\ufeff'+document.getElementById('spec').textContent.replace(/\r?\n/g,'\r\n');dl(t,'text/plain;charset=utf-8','conversation-design-specification.txt');return}
@@ -501,15 +510,16 @@ window.addEventListener('storage',e=>{if(e.key===KEY){showNotice('Your entries w
 main.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.f){S[t.dataset.f]=t.value;save();refreshDone();return}
   if(t.dataset.pl){const[k,i,f]=t.dataset.pl.split('|');while(S[k].length<=+i)S[k].push({a:'',b:''});S[k][+i][f]=t.value;save();refreshDone();return}
-  if(t.dataset.val){const[a,b]=t.dataset.val.split('|');(S.vals[a]=S.vals[a]||{})[b]=t.value;save();return}
+  if(t.dataset.val){const[a,b]=t.dataset.val.split('|');(S.vals[a]=S.vals[a]||{})[b]=t.value;save();refreshBadge(a);return}
   if(t.dataset.om){S.omit[t.dataset.om]=t.value;save()}});
 main.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.row!==undefined){S.row=+t.dataset.row;if(!row().roles.includes(S.role))S.role='';save();render();return}
   if(t.dataset.role){S.role=t.dataset.role;save();render();return}
-  if(t.dataset.use){if(t.checked)S.used[t.dataset.use]=1;else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
+  if(t.dataset.use){if(t.checked){S.used[t.dataset.use]=1;defaults(t.dataset.use)}else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
   if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();refreshReview();return}
   if(t.dataset.ts!==undefined){S.tests[t.dataset.ts]=t.checked;save();refreshDone();refreshReview()}});
 main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card){if(d.open)S.open=d.dataset.card}},true);
+function refreshBadge(id){const s=document.querySelector('details[data-card="'+id+'"] .badge.status');if(s){const d=detailsDone(id);s.className='badge status '+(d?'ok':'todo');s.textContent=d?'Decision filled in':'Write your decision'}}
 function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
 render();
 (function(){let seen=false;try{seen=sessionStorage.getItem('gc-seen')==='1';sessionStorage.setItem('gc-seen','1')}catch(e){}
