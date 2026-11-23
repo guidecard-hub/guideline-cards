@@ -460,8 +460,8 @@ const live=document.getElementById('live'),notice=document.getElementById('notic
 function say(t){live.textContent='';setTimeout(()=>{live.textContent=t},30)}
 function showNotice(html,kind){notice.className='notice '+(kind||'');notice.innerHTML=html;notice.hidden=false}
 function hideNotice(k){if(!notice.hidden&&(!k||notice.dataset.k===k)){notice.hidden=true;notice.innerHTML='';notice.dataset.k=''}}
-let armed=null;
-function arm(btn,label,fn){if(armed===btn.id){armed=null;fn();return}armed=btn.id;btn.dataset.orig=btn.textContent;btn.textContent=label;say(label);setTimeout(()=>{if(armed===btn.id){armed=null;btn.textContent=btn.dataset.orig}},4000)}
+let askFn=null;
+function ask(msg,okLabel,fn){askFn=fn;showNotice(msg+' <button type="button" id="ask-ok">'+okLabel+'</button> <button type="button" id="ask-no">Cancel</button>','warn');notice.dataset.k='ask';say(msg);notice.scrollIntoView({block:'nearest'});const n=document.getElementById('ask-no');if(n)n.focus()}
 const sig=o=>JSON.stringify(Object.assign({},o,{step:0,open:''}));
 const EXSTATE=()=>Object.assign(clone(EMPTY),clone(EXAMPLE));
 const changed=()=>sig(S)!==sig(EMPTY);
@@ -476,8 +476,8 @@ document.addEventListener('click',e=>{
     const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('spec'));const s=getSelection();s.removeAllRanges();s.addRange(r);document.getElementById('copied').textContent='Selected. Press Ctrl+C to copy.'};
     try{navigator.clipboard.writeText(t).then(ok,fb)}catch(x){fb()}}
 });
-document.getElementById('btn-example').onclick=function(){const go=()=>{S=EXSTATE();save();render(true);window.scrollTo({top:0})};if(changed()&&sig(S)!==sig(EXSTATE()))arm(this,'Click again to replace your entries',go);else go()};
-document.getElementById('btn-reset').onclick=function(){const go=()=>{S=clone(EMPTY);save();render(true);window.scrollTo({top:0})};if(changed())arm(this,'Click again to delete your entries',go);else go()};
+document.getElementById('btn-example').onclick=function(){askFn=null;hideNotice('ask');const go=()=>{S=EXSTATE();save();render(true);window.scrollTo({top:0})};if(changed()&&sig(S)!==sig(EXSTATE()))ask('Loading the example replaces everything you have entered.','Replace my entries',go);else go()};
+document.getElementById('btn-reset').onclick=function(){askFn=null;hideNotice('ask');const go=()=>{S=clone(EMPTY);save();render(true);window.scrollTo({top:0})};if(changed())ask('Start empty deletes everything you have entered. If you want to keep it, choose Save to file first.','Delete my entries',go);else go()};
 function dl(text,type,name){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function normalize(o){const s=Object.assign(clone(EMPTY),o);['misc','bound'].forEach(k=>{if(typeof s[k]==='string')s[k]=pairs(s[k]);if(!Array.isArray(s[k]))s[k]=[]});['used','vals','omit','checks','tests'].forEach(k=>{if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k]))s[k]={}});return s}
 document.getElementById('btn-save').onclick=function(){const d=new Date().toISOString();dl(JSON.stringify({app:'guideline-cards-prototype',version:2,savedAt:d,state:S},null,1),'application/json','guideline-cards-design-'+d.slice(0,10)+'.json');say('Saved as a file in your downloads folder.')};
@@ -489,9 +489,12 @@ fileIn.onchange=function(){const f=fileIn.files[0];fileIn.value='';if(!f)return;
   pending=normalize(o.state);pending.step=0;
   if(changed()){showNotice('Loading this file replaces your current entries. <button type="button" id="load-ok">Replace my entries</button> <button type="button" id="load-no">Cancel</button>','warn');notice.dataset.k='load';say('Loading this file replaces your current entries.')}
   else{S=pending;pending=null;save();render(true);window.scrollTo({top:0})}};r.onerror=()=>{showNotice('The file could not be read. Nothing was changed.','warn')};r.readAsText(f)};
-notice.addEventListener('click',e=>{if(e.target.id==='load-ok'&&pending){S=pending;pending=null;hideNotice();save();render(true);window.scrollTo({top:0})}
+notice.addEventListener('click',e=>{if(e.target.id==='ask-ok'&&askFn){const f=askFn;askFn=null;hideNotice();f()}
+  else if(e.target.id==='ask-no'){askFn=null;hideNotice();const t=document.getElementById('btn-reset');if(t)t.focus()}
+  else if(e.target.id==='load-ok'&&pending){S=pending;pending=null;hideNotice();save();render(true);window.scrollTo({top:0})}
   else if(e.target.id==='load-no'){pending=null;hideNotice()}
   else if(e.target.id==='reload'){location.reload()}});
+notice.addEventListener('keydown',e=>{if(e.key==='Escape'&&(notice.dataset.k==='ask'||notice.dataset.k==='load')){askFn=null;pending=null;hideNotice()}});
 window.addEventListener('storage',e=>{if(e.key===KEY){showNotice('Your entries were changed in another tab of this page. <button type="button" id="reload">Reload to see them</button> If you keep typing here, the other tab’s changes are overwritten.','warn');notice.dataset.k='tab'}});
 main.addEventListener('input',e=>{const t=e.target;
   if(t.dataset.f){S[t.dataset.f]=t.value;save();refreshDone();return}

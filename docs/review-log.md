@@ -28,6 +28,7 @@ The findings below are grouped by what was done. Findings were checked against t
 | The results of the review (step 7) were not part of the specification. | The specification ends with a review record, marked as a note for the lecturer and developer. |
 | The specification could only be copied. | It can also be downloaded as a text file. |
 | Card boxes repeated answers from earlier steps. | Cards for GC-04, GC-05, GC-11 and GC-14 show the earlier content in a linked block with an edit button. The boxes are for what is new. |
+| The buttons "Start empty" and "Load example" changed their label for 4 seconds and then switched back, which was confusing. The label could also stay stuck. | Both now show a message under the buttons that stays until you choose "Delete my entries" (or "Replace my entries") or "Cancel". Escape cancels. The message tells you to use Save to file first. |
 | Step 7 ticks were of little use and unclear. | Step 7 explains what to do, shows what the design says for each test input, highlights open items, links to the steps concerned and counts open items. All items must be ticked for the step to count as done. |
 
 ## Open, decided for later
