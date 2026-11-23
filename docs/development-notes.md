@@ -29,6 +29,7 @@ test inputs must match the lecturer guide. After a change, open the page, load t
 - A blind click-through with an own learning objective (business mathematics) for a calculation task and for a reflective task.
 - Comparison of all 14 cards, the matrix, the checklist and the test inputs with the guide and the framework document.
 - Automated click-through with Playwright in Chromium at desktop and phone width, including save and load, blocked storage, two tabs, keyboard focus and downloads.
+- Step 5 figure (response order): opens and closes with click, button and Escape, stays open while typing, readable in light and dark mode and at phone width.
 - Opening the file from disk without an internet connection. No script errors and no sideways scrolling.
 - Two independent AI-assisted reviews on 22 November 2026 (Claude Code and ChatGPT Codex). See [review-log.md](review-log.md).
 

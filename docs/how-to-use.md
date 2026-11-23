@@ -36,6 +36,8 @@ Load example, Load from file and Start empty ask you to confirm whenever you hav
 | 6 Boundaries | What does the chatbot refuse and where does it send students? | GC-14 |
 | 7 Review | Is the design ready to be used? | Checklist |
 
+The overview of the seven steps is the list on the start page. Select a step to jump to it. In step 5 you can open a figure that shows what the chatbot does after a student answer. Select the figure to see it larger. It is closed by default, so you only open it if you want it.
+
 In steps 2 to 6 you open the cards of the step. Each card has one box for your decision. You can also add an example from your course and a note, but you do not have to. The button "Use all recommended cards of this step" ticks the cards that the
 selection matrix recommends. Nothing is ticked without a click.
 

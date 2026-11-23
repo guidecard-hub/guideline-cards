@@ -42,6 +42,7 @@ The findings below are grouped by what was done. Findings were checked against t
 | The test input "an error that persists" did not show the GC-11 limit. | It shows the hint limit, the attempt limit and the boundary rows. |
 | GC-05 is not recommended for the misconception row, but a task with steps needs it. | The card says that the matrix does not recommend it and that the lecturer may use it when steps were entered in step 4. |
 | The button "Use all recommended cards of this step (N)" was unclear, and "instance fields" appeared in the specification. | The button reads "Tick the N recommended cards that are not ticked yet". The specification says "decisions for the cards". |
+| The figure of the response order from the Word guide was missing in the web version. | Added to step 5 as a figure that is closed by default and opens larger on a click. It is the vector figure from draw.io (Figure 4, Response routing), embedded in the single file. The overview of the seven steps was already part of the start page as a clickable list. |
 
 ## Open, decided for later
 
