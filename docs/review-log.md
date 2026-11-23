@@ -29,6 +29,10 @@ The findings below are grouped by what was done. Findings were checked against t
 | The specification could only be copied. | It can also be downloaded as a text file. |
 | Card boxes repeated answers from earlier steps. | Cards for GC-04, GC-05, GC-11 and GC-14 show the earlier content in a linked block with an edit button. The boxes are for what is new. |
 | The buttons "Start empty" and "Load example" changed their label for 4 seconds and then switched back, which was confusing. The label could also stay stuck. | Both now show a message under the buttons that stays until you choose "Delete my entries" (or "Replace my entries") or "Cancel". Escape cancels. The message tells you to use Save to file first. |
+| Ticking cards closed the other open cards. | Open cards stay open when the page updates. |
+| On steps 3, 4 and 6 a card said "Nothing written in step N yet" while the lecturer was in that step, and the block did not update while typing. | On the same step the card shows a short note that it uses the answer above. The block "Taken from step N" stays for GC-11, whose content comes from step 2. |
+| The checkbox "Use this card" had no card name for screen readers. | The name now includes the card id and title. |
+| A stored design from an earlier visit opened without a question. | On the first visit of a browser session, the page asks to continue or to delete it and start empty. |
 | Step 7 ticks were of little use and unclear. | Step 7 explains what to do, shows what the design says for each test input, highlights open items, links to the steps concerned and counts open items. All items must be ticked for the step to count as done. |
 
 ## Open, decided for later

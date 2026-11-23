@@ -247,10 +247,10 @@ const filled=k=>S[k].filter(p=>p.a.trim());
 const needsBoxes=c=>c.id!=='GC-02';
 const pairsText=(k,sep)=>filled(k).map(p=>'- '+p.a+(p.b?sep+p.b:'')).join('\n');
 const LINKS={
- 'GC-04':{n:3,get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
- 'GC-05':{n:4,get:()=>S.steps.trim()},
- 'GC-11':{n:2,get:()=>pairsText('misc',' (counterexample: ')+(filled('misc').some(p=>p.b)?'':'')},
- 'GC-14':{n:6,get:()=>pairsText('bound',' -> ')}};
+ 'GC-04':{n:3,what:'the role and the opening sentence',get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
+ 'GC-05':{n:4,what:'the steps of the task and the expected answers',get:()=>S.steps.trim()},
+ 'GC-11':{n:2,what:'the misconceptions',get:()=>pairsText('misc',' (counterexample: ')+(filled('misc').some(p=>p.b)?'':'')},
+ 'GC-14':{n:6,what:'the requests outside the role and where they go',get:()=>pairsText('bound',' -> ')}};
 LINKS['GC-11'].get=()=>filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n');
 const linkText=id=>LINKS[id]?LINKS[id].get():'';
 const detailsDone=id=>fieldsFilled(id)||!!linkText(id).trim();
@@ -273,7 +273,7 @@ function cardHtml(c){
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
   const status=used&&needsBoxes(c)?(detailsDone(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
-  const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
+  const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" aria-label="Use this card, ${c.id} ${esc(c.name)}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
   return `<div class="cardwrap ${c.core?'':'hasuse'}">${useBox}<details class="card ${c.core?'core':''}" data-card="${c.id}" ${open?'open':''}><summary><span class="gc">${c.id}</span><strong>${esc(c.name)}</strong>${badges}${useNote}</summary><div class="cbody">
   <p><b>Use it when:</b> ${esc(c.when)}</p>
@@ -283,7 +283,7 @@ function cardHtml(c){
   <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
   ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
   ${used&&!needsBoxes(c)?'<p class="note">This card needs no boxes. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
-  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Use the boxes below only for what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
+  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();if(S.step===L.n-1)return `<p class="linked same note">This card uses your answer in this step (${L.what}). You do not need to write it again. Use the boxes below only for what is new.</p>`;return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Use the boxes below only for what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
   ${used&&needsBoxes(c)?`<div class="grid3">
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
    <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
@@ -292,7 +292,7 @@ function cardHtml(c){
 function cardsFor(stage){
   const cs=CARDS.filter(c=>c.stage===stage);
   const todo=cs.filter(c=>!c.core&&recommended().includes(c.id)&&cardFit(c)&&!S.used[c.id]);
-  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it and to fill in its three course detail boxes. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three course detail boxes.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
+  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it. When a card is ticked, its three course detail boxes appear inside it. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to fill in its three course detail boxes.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
 const EX_HINT={objective:'Example (BPMN modelling course): Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'Example (BPMN modelling course): The students model the order process themselves, step by step.'};
 
 function renderInner(){
@@ -452,8 +452,8 @@ function refreshReview(){const rc=document.getElementById('rv-count');if(!rc)ret
  document.querySelectorAll('[data-ck]').forEach(i=>{const r=i.closest('.trow');if(r)r.classList.toggle('todo',!i.checked)});
  const nt=document.querySelectorAll('[data-ts]:not(:checked)').length,nk=document.querySelectorAll('[data-ck]:not(:checked)').length;
  rc.textContent=(nt+nk)?`Still open: ${nt} test input${nt===1?'':'s'} and ${nk} checklist question${nk===1?'':'s'}.`:'All test inputs and checklist questions are ticked.'}
-function render(nav){const a=document.activeElement;const id=a&&a.id;const ss=a&&a.selectionStart,se=a&&a.selectionEnd;
-  renderInner();refreshReview();
+function render(nav){const keep=nav?[]:[...document.querySelectorAll('details[data-card][open]')].map(d=>d.dataset.card);const a=document.activeElement;const id=a&&a.id;const ss=a&&a.selectionStart,se=a&&a.selectionEnd;
+  renderInner();refreshReview();keep.forEach(k=>{const d=main.querySelector('details[data-card="'+k+'"]');if(d)d.open=true});
   if(nav){const h=main.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}
   else if(id){const n=document.getElementById(id);if(n){n.focus({preventScroll:true});try{if(ss!=null)n.setSelectionRange(ss,se)}catch(x){}}}}
 const live=document.getElementById('live'),notice=document.getElementById('notice');
@@ -489,7 +489,9 @@ fileIn.onchange=function(){const f=fileIn.files[0];fileIn.value='';if(!f)return;
   pending=normalize(o.state);pending.step=0;
   if(changed()){showNotice('Loading this file replaces your current entries. <button type="button" id="load-ok">Replace my entries</button> <button type="button" id="load-no">Cancel</button>','warn');notice.dataset.k='load';say('Loading this file replaces your current entries.')}
   else{S=pending;pending=null;save();render(true);window.scrollTo({top:0})}};r.onerror=()=>{showNotice('The file could not be read. Nothing was changed.','warn')};r.readAsText(f)};
-notice.addEventListener('click',e=>{if(e.target.id==='ask-ok'&&askFn){const f=askFn;askFn=null;hideNotice();f()}
+notice.addEventListener('click',e=>{if(e.target.id==='resume-ok'){hideNotice()}
+  else if(e.target.id==='resume-new'){hideNotice();S=clone(EMPTY);save();render(true)}
+  else if(e.target.id==='ask-ok'&&askFn){const f=askFn;askFn=null;hideNotice();f()}
   else if(e.target.id==='ask-no'){askFn=null;hideNotice();const t=document.getElementById('btn-reset');if(t)t.focus()}
   else if(e.target.id==='load-ok'&&pending){S=pending;pending=null;hideNotice();save();render(true);window.scrollTo({top:0})}
   else if(e.target.id==='load-no'){pending=null;hideNotice()}
@@ -510,6 +512,8 @@ main.addEventListener('change',e=>{const t=e.target;
 main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card){if(d.open)S.open=d.dataset.card}},true);
 function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
 render();
+(function(){let seen=false;try{seen=sessionStorage.getItem('gc-seen')==='1';sessionStorage.setItem('gc-seen','1')}catch(e){}
+  if(!seen&&changed()){showNotice('A design from an earlier visit is still saved in this browser. <button type="button" id="resume-ok">Continue with it</button> <button type="button" id="resume-new">Delete it and start empty</button> On a shared computer, start empty.','warn');notice.dataset.k='resume'}})();
 </script>
 </body>
 </html>
