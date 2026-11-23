@@ -66,3 +66,8 @@ These are checks of correctness by the author and AI assistants. They are not a 
 The prototype was developed with the help of Claude (Anthropic). The AI assistant wrote and tested the code and drafted
 the texts. The author gave the requirements, decided on the content and reviews the result. The thesis documents are the
 reference for correctness.
+
+## Linked card content
+
+`LINKS` lists the cards that reuse an earlier answer (GC-04, GC-05, GC-11, GC-14). `linkText(id)` builds the text from the step entries.
+`testSource(k)` does the same for the test inputs of step 7. When you add a card that reuses a step answer, add it to `LINKS`.

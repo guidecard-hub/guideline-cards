@@ -56,7 +56,7 @@ the lecturer guide of the thesis. The thesis is the authoritative source.
 ## Roadmap
 
 - Download of the specification as a Word file.
-- Fewer boxes per card and a check that the design is complete.
+- A check that the design is complete in context, for example both sides of a pair.
 - A decision whether the specification needs a second version written directly for a chatbot.
 - Accessibility check with a screen reader and tests in Safari.
 - Evaluation in walkthrough sessions with lecturers, as planned in the thesis.

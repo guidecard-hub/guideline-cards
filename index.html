@@ -137,6 +137,18 @@ button[data-tickrec]{margin-left:6px;padding:3px 10px;font-size:13px}
 @media (max-width:640px){.pl{display:block}}
 .pc textarea{min-height:56px}
 @media (max-width:640px){nav.steps{flex-wrap:nowrap;overflow-x:auto}header .tools{gap:6px}header .tools button{padding:6px 10px;font-size:14px}h1{font-size:20px}header .sub{font-size:13px}}
+
+.linked{margin:10px 0;padding:10px 12px;border:1px dashed var(--ctl);border-radius:6px;background:var(--accent-soft)}
+.linked pre{white-space:pre-wrap;font:inherit;margin:6px 0;color:var(--fg)}
+.linked.gap{background:var(--warn-soft);border-style:solid}
+.trow{padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.trow.todo{border-left:4px solid var(--warn)}
+.trow.gap{background:var(--warn-soft)}
+.trow .tdesign{margin:6px 0 0 30px;font-size:14px}
+.trow .tdesign pre{white-space:pre-wrap;font:inherit;margin:2px 0 0}
+.gapmsg{color:var(--fg);font-weight:500}
+ol.todo{margin:6px 0 6px 18px;padding:0}
+button.lnk{border:0;background:transparent;color:var(--accent);padding:2px 6px;text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -234,6 +246,15 @@ function cardFit(c){return c.roles==='all'||!S.role||c.roles.includes(S.role)}
 function isUsed(c){return !!c.core||!!S.used[c.id]}
 const filled=k=>S[k].filter(p=>p.a.trim());
 const needsBoxes=c=>c.id!=='GC-02';
+const pairsText=(k,sep)=>filled(k).map(p=>'- '+p.a+(p.b?sep+p.b:'')).join('\n');
+const LINKS={
+ 'GC-04':{n:3,get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
+ 'GC-05':{n:4,get:()=>S.steps.trim()},
+ 'GC-11':{n:2,get:()=>pairsText('misc',' (counterexample: ')+(filled('misc').some(p=>p.b)?'':'')},
+ 'GC-14':{n:6,get:()=>pairsText('bound',' -> ')}};
+LINKS['GC-11'].get=()=>filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n');
+const linkText=id=>LINKS[id]?LINKS[id].get():'';
+const detailsDone=id=>fieldsFilled(id)||!!linkText(id).trim();
 const fieldsFilled=id=>{const v=S.vals[id]||{};return !!((v.ex||'').trim()||(v.va||'').trim()||(v.no||'').trim())};
 function done(i){switch(i){
  case 0:return !!(S.objective.trim()&&S.activity.trim());
@@ -242,7 +263,7 @@ function done(i){switch(i){
  case 3:return !!S.order.trim();
  case 4:return isReflective()?!!(S.r_unclear.trim()&&S.criterion.trim()&&S.r_incorrect.trim()&&S.r_action.trim()):!!(S.r_unclear.trim()&&S.r_incorrect.trim()&&S.r_correct.trim()&&S.r_misc.trim());
  case 5:return filled('bound').length>0;
- case 6:return CHECKS.every((_,k)=>S.checks[k]);
+ case 6:return CHECKS.every((_,k)=>S.checks[k])&&(isReflective()?TESTS_REFL:TESTS_TASK).every((_,k)=>S.tests[k]);
  default:return false}}
 function ta(id,label,val,ph,rows,help){return `<div class="row"><label for="${id}">${label}</label>${help?`<span class="help">${help}</span>`:''}<textarea id="${id}" data-f="${id}" placeholder="${esc(ph||'')}" style="min-height:${(rows||3)*24}px">${esc(val)}</textarea></div>`}
 function pairList(k,la,lb,pa,pb){const list=S[k].length?S[k]:[{a:'',b:''}];
@@ -251,7 +272,7 @@ function cardHtml(c){
   const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
   const v=S.vals[c.id]||{};
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
-  const status=used&&needsBoxes(c)?(fieldsFilled(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
+  const status=used&&needsBoxes(c)?(detailsDone(c.id)?'<span class="badge ok">Course details filled in</span>':'<span class="badge todo">Fill in your course details</span>'):'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
   const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
@@ -263,6 +284,7 @@ function cardHtml(c){
   <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
   ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
   ${used&&!needsBoxes(c)?'<p class="note">This card needs no boxes. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
+  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Use the boxes below only for what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
   ${used&&needsBoxes(c)?`<div class="grid3">
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
    <div class="row"><label for="va-${c.id}">Chosen values</label><textarea id="va-${c.id}" data-val="${c.id}|va" placeholder="${esc(c.decide)}">${esc(v.va||'')}</textarea></div>
@@ -317,10 +339,14 @@ function renderInner(){
    <p class="hint">List the requests outside the role. For each one, name the right contact person or material, for example the course forum.</p>
    <div class="row"><label>Requests outside the role and where they go</label>${pairList('bound','Request outside the role','Contact person or material','Questions about the modelling tool','Course forum')}</div>${cardsFor(6)}`}
   if(i===6){const rec=recommended();const omitted=rec.filter(id=>!S.used[id]);const tests=isReflective()?TESTS_REFL:TESTS_TASK;
+   const WHERE=['Step 1','Step 4','Steps 4 and 5','Steps 3 and 6','','The specification'], GO=[[0],[3],[3,4],[2,5],[],[7]];
+   const linkBtns=k=>GO[k].map(n=>`<button type="button" class="lnk" data-go="${n}">${n===7?'Read the specification':'Go to step '+(n+1)}</button>`).join(' ');
+   const ts=tests.map((t,k)=>({t,k,...testSource(k)}));
    h=`<h2>Step 7: Review</h2><p class="q">Is the design ready to be used?</p>
-   <p class="hint">Before students use the chatbot, answer the six questions and go through the test inputs. Go back to the step concerned wherever an answer is no.</p>
-   <h3>Review checklist</h3><div class="checks">${CHECKS.map((t,k)=>`<label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(t)}</label>`).join('')}</div>
-   <h3>Test inputs (${isReflective()?'reflective tasks':'tasks with an expected answer'})</h3><p class="hint">For each test input, find the response that your design describes and tick the input. If there is none, go back to the step concerned.</p><div class="checks">${tests.map((t,k)=>`<label class="chk" for="ts-${k}"><input type="checkbox" id="ts-${k}" data-ts="${k}" ${S.tests[k]?'checked':''}>${esc(t)}</label>`).join('')}</div>
+   <div class="box"><b>What to do in this step</b><ol class="todo"><li>Go through the test inputs below. Each one is a situation that a student can cause. Read what your design says the chatbot does, then tick the input.</li><li>If the page shows “Nothing written yet” or you are not satisfied with the response, click the button to go back to the step, add it, and come back.</li><li>Answer the six questions of the checklist and tick them.</li></ol><p class="note" id="rv-count" role="status"></p></div>
+   <h3>Test inputs (${isReflective()?'reflective tasks':'tasks with an expected answer'})</h3>
+   <div class="checks">${ts.map(o=>`<div class="trow ${o.text.trim()?'':'gap'} ${S.tests[o.k]?'':'todo'}" data-trow="${o.k}"><label class="chk" for="ts-${o.k}"><input type="checkbox" id="ts-${o.k}" data-ts="${o.k}" ${S.tests[o.k]?'checked':''}><b>${esc(o.t)}</b></label>${o.text.trim()?`<div class="tdesign"><span class="note">Your design says (${esc(o.where)}):</span><pre>${esc(o.text.trim())}</pre></div>`:`<div class="tdesign gapmsg">Nothing written yet. <button type="button" data-go="${o.go}">Go to step ${o.go+1}</button></div>`}</div>`).join('')}</div>
+   <h3>Review checklist</h3><div class="checks">${CHECKS.map((t,k)=>`<div class="trow ${S.checks[k]?'':'todo'}" data-crow="${k}"><label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(t)}</label>${GO[k].length?`<div class="tdesign">${linkBtns(k)}</div>`:''}</div>`).join('')}</div>
    ${omitted.length?`<h3>Recommended cards you left out</h3><p class="hint">If you leave out a recommended card, note why its function is not needed or which other card covers it.</p>${omitted.map(id=>`<div class="row"><label for="om-${id}">${id} ${esc(cardById(id).name)}</label><input type="text" id="om-${id}" data-om="${id}" value="${esc(S.omit[id]||'')}"></div>`).join('')}`:''}
    ${S.used['GC-09']?'':'<p class="hint">You do not use GC-09, so end the conversation with a short closing that refers back to the objective of GC-01.</p>'}`}
   if(i===7){const m=missing();
@@ -381,9 +407,10 @@ function missing(){const m=[];
  if(isReflective()){if(!S.criterion.trim())m.push('Step 5: criterion for reflection');if(!S.r_incorrect.trim())m.push('Step 5: response to an unsupported judgement');if(!S.r_action.trim())m.push('Step 5: response to an action whose consequences the student has not evaluated')}
  else{if(!S.r_misc.trim())m.push('Step 5: response to a listed misconception');if(!S.r_incorrect.trim())m.push('Step 5: response to an incorrect answer');if(!S.r_correct.trim())m.push('Step 5: response to a correct answer')}
  if(!filled('bound').length)m.push('Step 6: requests outside the role');
- const nc=CARDS.filter(c=>isUsed(c)&&needsBoxes(c)&&!fieldsFilled(c.id)).map(c=>c.id);
+ const nc=CARDS.filter(c=>isUsed(c)&&needsBoxes(c)&&!detailsDone(c.id)).map(c=>c.id);
  if(nc.length)m.push('Course details for '+nc.join(', ')+' (open the card in its step)');
  const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
+ const nt2=(isReflective()?TESTS_REFL:TESTS_TASK).filter((_,k)=>!S.tests[k]).length;if(nt2)m.push(`Step 7: ${nt2} test input${nt2>1?'s':''} not ticked yet`);
  return m}
 function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(v||'').trim()||'(not filled in)')+'\n');
  L.push('CONVERSATION DESIGN SPECIFICATION\n');
@@ -399,15 +426,35 @@ function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(
  add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);if(isReflective())add('Action whose consequences the student has not evaluated',S.r_action);else add('Correct answer',S.r_correct);
  L.push('6 BOUNDARY DEFINITION');add('Requests outside the role',filled('bound').map(p=>'- '+p.a+(p.b?' -> '+p.b:'')).join('\n'));
  L.push('SELECTED GUIDELINE CARDS\nEach card is a rule for one move of the chatbot. Apply every card where its condition holds.\n');
- L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};if(c.id==='GC-02')return c.id+' '+c.name+' (applies in every conversation)\n  Chosen at design time: '+(r?r.method:'(not filled in)')+'. The conversation uses this one main teaching method. Other methods appear only as short branches.';return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+'\n  Example from this course: '+(v.ex||'(not filled in)')+'\n  Values chosen by the lecturer: '+(v.va||'(not filled in)')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
+ L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};if(c.id==='GC-02')return c.id+' '+c.name+' (applies in every conversation)\n  Chosen at design time: '+(r?r.method:'(not filled in)')+'. The conversation uses this one main teaching method. Other methods appear only as short branches.';const lk=linkText(c.id).trim();const ind=t=>t.replace(/\n/g,'\n    ');return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+(lk?'\n  From step '+LINKS[c.id].n+':\n    '+ind(lk):'')+((v.ex&&v.ex.trim())||!lk?'\n  Example from this course: '+(v.ex&&v.ex.trim()?v.ex.trim():'(not filled in)'):'')+((v.va&&v.va.trim())||!lk?'\n  Values chosen by the lecturer: '+(v.va&&v.va.trim()?v.va.trim():'(not filled in)'):'')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
  const om=recommended().filter(id=>!S.used[id]);const tl=isReflective()?TESTS_REFL:TESTS_TASK;
  L.push('NOTES FOR THE LECTURER AND DEVELOPER, NOT INSTRUCTIONS TO THE CHATBOT\n\nReview checklist (step 7)\n'+CHECKS.map((q,k)=>(S.checks[k]?'[x] ':'[ ] ')+q).join('\n')+'\n\nTest inputs. Marked when the design describes a response.\n'+tl.map((q,k)=>(S.tests[k]?'[x] ':'[ ] ')+q).join('\n')+'\n');
  if(om.length)L.push('Recommended cards left out\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
  return L.join('\n')}
 
 const main=document.getElementById('main');
+function testSource(k){const rf=isReflective();
+ const bound=pairsText('bound',' -> ');const v=id=>((S.vals[id]||{}).va||'').trim();
+ if(!rf){switch(k){
+  case 0:return {text:S.r_correct,where:'Step 5',go:4};
+  case 1:return {text:S.r_misc,where:'Step 5',go:4};
+  case 2:return {text:S.r_incorrect,where:'Step 5',go:4};
+  case 3:return {text:S.r_unclear,where:'Step 5',go:4};
+  case 4:return {text:bound,where:'Step 6',go:5};
+  default:return {text:[S.used['GC-10']?v('GC-10'):'',bound].filter(Boolean).join('\n'),where:'Step 5 and step 6',go:4}}}
+ switch(k){
+  case 0:return {text:S.r_incorrect,where:'Step 5',go:4};
+  case 1:return {text:S.r_action,where:'Step 5',go:4};
+  case 2:return {text:S.r_unclear,where:'Step 5',go:4};
+  case 3:return {text:bound,where:'Step 6',go:5};
+  default:return {text:[S.r_unclear,v('GC-12')].filter(Boolean).join('\n'),where:'Step 5',go:4}}}
+function refreshReview(){const rc=document.getElementById('rv-count');if(!rc)return;
+ document.querySelectorAll('[data-ts]').forEach(i=>{const r=i.closest('.trow');if(r)r.classList.toggle('todo',!i.checked)});
+ document.querySelectorAll('[data-ck]').forEach(i=>{const r=i.closest('.trow');if(r)r.classList.toggle('todo',!i.checked)});
+ const nt=document.querySelectorAll('[data-ts]:not(:checked)').length,nk=document.querySelectorAll('[data-ck]:not(:checked)').length;
+ rc.textContent=(nt+nk)?`Still open: ${nt} test input${nt===1?'':'s'} and ${nk} checklist question${nk===1?'':'s'}.`:'All test inputs and checklist questions are ticked.'}
 function render(nav){const a=document.activeElement;const id=a&&a.id;const ss=a&&a.selectionStart,se=a&&a.selectionEnd;
-  renderInner();
+  renderInner();refreshReview();
   if(nav){const h=main.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}
   else if(id){const n=document.getElementById(id);if(n){n.focus({preventScroll:true});try{if(ss!=null)n.setSelectionRange(ss,se)}catch(x){}}}}
 const live=document.getElementById('live'),notice=document.getElementById('notice');
@@ -456,8 +503,8 @@ main.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.row!==undefined){S.row=+t.dataset.row;if(!row().roles.includes(S.role))S.role='';save();render();return}
   if(t.dataset.role){S.role=t.dataset.role;save();render();return}
   if(t.dataset.use){if(t.checked)S.used[t.dataset.use]=1;else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
-  if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();return}
-  if(t.dataset.ts!==undefined){S.tests[t.dataset.ts]=t.checked;save()}});
+  if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();refreshReview();return}
+  if(t.dataset.ts!==undefined){S.tests[t.dataset.ts]=t.checked;save();refreshDone();refreshReview()}});
 main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card){if(d.open)S.open=d.dataset.card}},true);
 function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
 render();

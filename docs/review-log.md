@@ -27,12 +27,13 @@ The findings below are grouped by what was done. Findings were checked against t
 | GC-02 asked for boxes that do not exist for a design-time card, and its text did not fit a chatbot. | GC-02 has no boxes. The specification states the chosen teaching method. |
 | The results of the review (step 7) were not part of the specification. | The specification ends with a review record, marked as a note for the lecturer and developer. |
 | The specification could only be copied. | It can also be downloaded as a text file. |
+| Card boxes repeated answers from earlier steps. | Cards for GC-04, GC-05, GC-11 and GC-14 show the earlier content in a linked block with an edit button. The boxes are for what is new. |
+| Step 7 ticks were of little use and unclear. | Step 7 explains what to do, shows what the design says for each test input, highlights open items, links to the steps concerned and counts open items. All items must be ticked for the step to count as done. |
 
 ## Open, decided for later
 
 | Finding | Status |
 |---|---|
-| Card boxes repeat earlier answers and take too long. | To do. Prefill from the step answers and no boxes for GC-02. |
 | Completeness is not checked in context, for example both sides of a pair. | To do. |
 | Two candidate methods for simulated cases. | To do. |
 | A second output written directly for a chatbot. | Decision needed. The framework treats the transfer to a chatbot as outside its scope. |
