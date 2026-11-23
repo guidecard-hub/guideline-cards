@@ -43,7 +43,7 @@ You do not write anything twice. If a card needs content that you already wrote 
 
 ## Step 7 Review
 
-Step 7 tells you what to do. It lists the test inputs, each with what your design says the chatbot does (taken from your own entries in steps 5 and 6), and the six checklist questions, each with links to the steps concerned. Items that are not ticked have a coloured edge, and a counter shows how many are still open. If your design has nothing written for a situation, the page says "Nothing written yet" and a button takes you to the step. The test inputs show whether every situation that a student can cause is covered in your content. They are not a check that fields are filled. They are also the acceptance test for a chatbot built later from the specification.
+Step 7 tells you what to do. It lists the test inputs, each with what your design says the chatbot does (taken from your own entries in steps 5 and 6), and four checklist questions, each with links to the steps concerned. The two checklist questions about the specification (independent of a chatbot tool, understandable for a colleague) are on the page of the specification, below the text, because you can only answer them after reading it. Items that are not ticked have a coloured edge, and a counter shows how many are still open. If your design has nothing written for a situation, the page says "Nothing written yet" and a button takes you to the step. The test inputs show whether every situation that a student can cause is covered in your content. They are not a check that fields are filled. They are also the acceptance test for a chatbot built later from the specification.
 
 ## Reflective conversations
 

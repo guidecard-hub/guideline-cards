@@ -54,7 +54,7 @@ These are checks of correctness by the author and AI assistants. They are not a 
 
 ## Plan
 
-1. Fewer boxes per card, check of completeness.
+1. Check of completeness in context.
 2. Download of the specification as a Word file.
 3. Decision whether the specification needs a second version written directly for a chatbot.
 4. Decision whether to move the content into a data block, after the walkthroughs.
@@ -71,3 +71,8 @@ reference for correctness.
 
 `LINKS` lists the cards that reuse an earlier answer (GC-04, GC-05, GC-11, GC-14). `linkText(id)` builds the text from the step entries.
 `testSource(k)` does the same for the test inputs of step 7. When you add a card that reuses a step answer, add it to `LINKS`.
+`counts:false` (GC-11) means the linked text does not count as the decision of the card. `sec` and `secname` give the section of the specification that holds the text, so the card section only points to it.
+
+## Defaults and review questions
+
+`DEF` holds defaults of cards (GC-10). A default is never written into the box. `statusOf(id)` gives the badge (decision filled in, taken from step N, default is used, write your decision). `SPECCK` lists the checklist questions that are answered on the specification page (indexes 4 and 5). `refreshSpec()` updates the text and the list of open items when one is ticked.

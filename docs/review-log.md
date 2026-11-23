@@ -35,6 +35,13 @@ The findings below are grouped by what was done. Findings were checked against t
 | The checkbox "Use this card" had no card name for screen readers. | The name now includes the card id and title. |
 | A stored design from an earlier visit opened without a question. | On the first visit of a browser session, the page asks to continue or to delete it and start empty. |
 | Step 7 ticks were of little use and unclear. | Step 7 explains what to do, shows what the design says for each test input, highlights open items, links to the steps concerned and counts open items. All items must be ticked for the step to count as done. |
+| The last two checklist questions needed the specification, so the lecturer had to leave step 7 and come back (second AI time test). | The two questions are on the specification page, below the text. Ticking them updates the review record in the specification and the list of open items. |
+| The specification printed task steps, misconceptions and boundaries twice (in the worksheet and again in the card section). | The card section points to the section above ("Content: see section N"). Lists are printed once. The optional example is printed only when written. |
+| GC-10 was prefilled with a default, and the specification listed it as a value chosen by the lecturer. | No prefill. The box shows the default as a hint, the badge says "Default is used", and the specification says "none given, default of the card". |
+| GC-11 counted as filled because the misconceptions came from step 2, although the attempt limit was empty. | GC-11 needs its own decision. |
+| The test input "an error that persists" did not show the GC-11 limit. | It shows the hint limit, the attempt limit and the boundary rows. |
+| GC-05 is not recommended for the misconception row, but a task with steps needs it. | The card says that the matrix does not recommend it and that the lecturer may use it when steps were entered in step 4. |
+| The button "Use all recommended cards of this step (N)" was unclear, and "instance fields" appeared in the specification. | The button reads "Tick the N recommended cards that are not ticked yet". The specification says "decisions for the cards". |
 
 ## Open, decided for later
 

@@ -252,18 +252,20 @@ function isUsed(c){return !!c.core||!!S.used[c.id]}
 const filled=k=>S[k].filter(p=>p.a.trim());
 const needsBoxes=c=>c.id!=='GC-02';
 const SHORT=['GC-08','GC-09','GC-10','GC-11','GC-12'];
-const PH={'GC-11':'Number of unsuccessful attempts before a worked example'};
-function defaults(id){if(id==='GC-10'){const v=S.vals[id]=S.vals[id]||{};if(!(v.va||'').trim())v.va='Two hints per step, then a worked example.'}}
+const PH={'GC-11':'Number of unsuccessful attempts before a worked example','GC-10':'Leave empty to use the default of the card: two hints per step, then a worked example.'};
+const DEF={'GC-10':'Two hints per step, then a worked example.'};
+const SPECCK=[4,5];
 const pairsText=(k,sep)=>filled(k).map(p=>'- '+p.a+(p.b?sep+p.b:'')).join('\n');
 const LINKS={
- 'GC-04':{n:3,what:'the role and the opening sentence',get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
- 'GC-05':{n:4,what:'the steps of the task and the expected answers',get:()=>S.steps.trim()},
- 'GC-11':{n:2,what:'the misconceptions',get:()=>pairsText('misc',' (counterexample: ')+(filled('misc').some(p=>p.b)?'':'')},
- 'GC-14':{n:6,what:'the requests outside the role and where they go',get:()=>pairsText('bound',' -> ')}};
+ 'GC-04':{n:3,sec:3,secname:'Role and Opening sentence',what:'the role and the opening sentence',get:()=>[S.role?'Role: '+S.role:'',S.opening.trim()?'Opening sentence: '+S.opening.trim():''].filter(Boolean).join('\n')},
+ 'GC-05':{n:4,sec:4,secname:'Steps and expected answers',what:'the steps of the task and the expected answers',get:()=>S.steps.trim()},
+ 'GC-11':{n:2,sec:2,secname:'Typical misconceptions and counterexamples',counts:false,todo:'Write in the decision box below the number of unsuccessful attempts before a worked example.',what:'the misconceptions',get:()=>pairsText('misc',' (counterexample: ')+(filled('misc').some(p=>p.b)?'':'')},
+ 'GC-14':{n:6,sec:6,secname:'Requests outside the role',what:'the requests outside the role and where they go',get:()=>pairsText('bound',' -> ')}};
 LINKS['GC-11'].get=()=>filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n');
 const linkText=id=>LINKS[id]?LINKS[id].get():'';
-const detailsDone=id=>fieldsFilled(id)||!!linkText(id).trim();
 const fieldsFilled=id=>{const v=S.vals[id]||{};return !!((v.ex||'').trim()||(v.va||'').trim()||(v.no||'').trim())};
+const statusOf=id=>{if(fieldsFilled(id))return{ok:1,t:'Decision filled in'};const L=LINKS[id];if(L&&L.counts!==false&&linkText(id).trim())return{ok:1,t:'Taken from step '+L.n};if(DEF[id])return{ok:1,t:'Default is used'};return{ok:0,t:'Write your decision'}};
+const detailsDone=id=>!!statusOf(id).ok;
 function done(i){switch(i){
  case 0:return !!(S.objective.trim()&&S.activity.trim());
  case 1:return S.row>=0&&(isReflective()||filled('misc').length>0);
@@ -271,7 +273,7 @@ function done(i){switch(i){
  case 3:return !!S.order.trim();
  case 4:return isReflective()?!!(S.r_unclear.trim()&&S.criterion.trim()&&S.r_incorrect.trim()&&S.r_action.trim()):!!(S.r_unclear.trim()&&S.r_incorrect.trim()&&S.r_correct.trim()&&S.r_misc.trim());
  case 5:return filled('bound').length>0;
- case 6:return CHECKS.every((_,k)=>S.checks[k])&&(isReflective()?TESTS_REFL:TESTS_TASK).every((_,k)=>S.tests[k]);
+ case 6:return CHECKS.every((_,k)=>SPECCK.includes(k)||S.checks[k])&&(isReflective()?TESTS_REFL:TESTS_TASK).every((_,k)=>S.tests[k]);
  default:return false}}
 function ta(id,label,val,ph,rows,help){return `<div class="row"><label for="${id}">${label}</label>${help?`<span class="help">${help}</span>`:''}<textarea id="${id}" data-f="${id}" placeholder="${esc(ph||'')}" style="min-height:${(rows||3)*24}px">${esc(val)}</textarea></div>`}
 function pairList(k,la,lb,pa,pb){const list=S[k].length?S[k]:[{a:'',b:''}];
@@ -280,7 +282,7 @@ function cardHtml(c){
   const rec=recommended().includes(c.id),fit=cardFit(c),used=isUsed(c);
   const v=S.vals[c.id]||{};
   const roles=c.roles==='all'?'All roles':c.roles.join(', ');
-  const status=used&&needsBoxes(c)?(detailsDone(c.id)?'<span class="badge status ok">Decision filled in</span>':'<span class="badge status todo">Write your decision</span>'):'';
+  const st=statusOf(c.id);const status=used&&needsBoxes(c)?`<span class="badge status ${st.ok?'ok':'todo'}">${esc(st.t)}</span>`:'';
   const badges=(c.core?'<span class="badge core">Core card</span>':'')+(rec?'<span class="badge rec">Recommended for your row</span>':'')+(!fit?'<span class="badge bad">Your role is not listed</span>':'')+status;
   const useNote=c.core?'<span class="use note">Used in every design</span>':'';const useBox=c.core?'':`<label class="use" for="use-${c.id}"><input type="checkbox" id="use-${c.id}" data-use="${c.id}" aria-label="Use this card, ${c.id} ${esc(c.name)}" ${used?'checked':''}>Use this card</label>`;
   const open=S.open===c.id;
@@ -291,8 +293,9 @@ function cardHtml(c){
   <p><b>Limits:</b> ${esc(c.limits)}</p>
   <p><b>What you decide:</b> ${esc(c.decide)}. <span class="note">Suitable roles: ${roles}.</span></p>
   ${!fit?`<p class="warn">The guide keeps a card only if your role is listed for it. If you extend it to the role “${esc(S.role)}”, note this as your decision in the course notes.</p>`:''}
+  ${c.id==='GC-05'&&!rec&&S.steps.trim()?'<p class="note">The selection matrix does not recommend this card for your row. You entered the steps of a task in step 4, so you may use it. Tick it if the conversation goes through the steps one at a time.</p>':''}
   ${used&&!needsBoxes(c)?'<p class="note">This card needs no decision box. You apply it in step 2, when you choose the row of the selection matrix.</p>':''}
-  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();if(S.step===L.n-1)return `<p class="linked same note">This card uses your answer in this step (${L.what}). You do not need to write it again. Write in the decision box below only what is new.</p>`;return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. Write in the decision box below only what is new.</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
+  ${used&&LINKS[c.id]?(()=>{const L=LINKS[c.id],t=L.get().trim();if(S.step===L.n-1)return `<p class="linked same note">This card uses your answer in this step (${L.what}). You do not need to write it again. ${L.todo||'Write in the decision box below only what is new.'}</p>`;return t?`<div class="linked"><b>Taken from step ${L.n}</b><pre>${esc(t)}</pre><button type="button" data-go="${L.n-1}">Edit in step ${L.n}</button><span class="note"> You do not need to write this again. ${L.todo||'Write in the decision box below only what is new.'}</span></div>`:`<div class="linked gap"><b>Nothing written in step ${L.n} yet.</b> <button type="button" data-go="${L.n-1}">Go to step ${L.n}</button></div>`})():''}
   ${used&&needsBoxes(c)?`<div class="decision"><div class="row"><label for="va-${c.id}">Your decision</label><textarea id="va-${c.id}" class="${SHORT.includes(c.id)?'short':''}" data-val="${c.id}|va" placeholder="${esc(PH[c.id]||c.decide)}">${esc(v.va||'')}</textarea></div>
    <details class="opt" ${(v.ex||v.no)?'open':''}><summary>Add an example from your course or a note (optional)</summary><div class="grid2">
    <div class="row"><label for="ex-${c.id}">Example in this course</label><textarea id="ex-${c.id}" data-val="${c.id}|ex" placeholder="What the chatbot says here, in your course">${esc(v.ex||'')}</textarea></div>
@@ -301,7 +304,7 @@ function cardHtml(c){
 function cardsFor(stage){
   const cs=CARDS.filter(c=>c.stage===stage);
   const todo=cs.filter(c=>!c.core&&recommended().includes(c.id)&&cardFit(c)&&!S.used[c.id]);
-  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it. When a card is ticked, a box for your decision appears inside it. ${todo.length?`<button type="button" data-tickrec="${stage}">Use all recommended cards of this step (${todo.length})</button>`:''}</p>`:`<p class="hint">Open the card to read it and to write your decision.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
+  return `<h3>Cards for this step</h3>${cs.some(c=>!c.core)?`<p class="hint">Tick “Use this card” for every card you keep. Open a card to read it. When a card is ticked, a box for your decision appears inside it. ${todo.length?`<button type="button" data-tickrec="${stage}">Tick the ${todo.length} recommended card${todo.length>1?'s':''} that ${todo.length>1?'are':'is'} not ticked yet</button>`:''}</p>`:`<p class="hint">Open the card to read it and to write your decision.</p>`}<div class="matrix">${cs.map(cardHtml).join('')}</div>`}
 const EX_HINT={objective:'Example (BPMN modelling course): Students can model a business process with an exclusive gateway in BPMN 2.0.',activity:'Example (BPMN modelling course): The students model the order process themselves, step by step.'};
 
 function renderInner(){
@@ -347,22 +350,24 @@ function renderInner(){
    <p class="hint">List the requests outside the role. For each one, name the right contact person or material, for example the course forum.</p>
    <div class="row"><label>Requests outside the role and where they go</label>${pairList('bound','Request outside the role','Contact person or material','Questions about the modelling tool','Course forum')}</div>${cardsFor(6)}`}
   if(i===6){const rec=recommended();const omitted=rec.filter(id=>!S.used[id]);const tests=isReflective()?TESTS_REFL:TESTS_TASK;
-   const WHERE=['Step 1','Step 4','Steps 4 and 5','Steps 3 and 6','','The specification'], GO=[[0],[3],[3,4],[2,5],[],[7]];
+   const WHERE=['Step 1','Step 4','Steps 4 and 5','Steps 3 and 6'], GO=[[0],[3],[3,4],[2,5]];
    const linkBtns=k=>GO[k].map(n=>`<button type="button" class="lnk" data-go="${n}">${n===7?'Read the specification':'Go to step '+(n+1)}</button>`).join(' ');
    const ts=tests.map((t,k)=>({t,k,...testSource(k)}));
    h=`<h2>Step 7: Review</h2><p class="q">Is the design ready to be used?</p>
-   <div class="box"><b>What to do in this step</b><ol class="todo"><li>Go through the test inputs below. Each one is a situation that a student can cause. Read what your design says the chatbot does, then tick the input.</li><li>If the page shows “Nothing written yet” or you are not satisfied with the response, click the button to go back to the step, add it, and come back.</li><li>Answer the six questions of the checklist and tick them.</li></ol><p class="note" id="rv-count" role="status"></p></div>
+   <div class="box"><b>What to do in this step</b><ol class="todo"><li>Go through the test inputs below. Each one is a situation that a student can cause. Read what your design says the chatbot does, then tick the input.</li><li>If the page shows “Nothing written yet” or you are not satisfied with the response, click the button to go back to the step, add it, and come back.</li><li>Answer the four questions of the checklist and tick them. Two more questions follow on the page of the specification.</li></ol><p class="note" id="rv-count" role="status"></p></div>
    <h3>Test inputs (${isReflective()?'reflective tasks':'tasks with an expected answer'})</h3>
    <div class="checks">${ts.map(o=>`<div class="trow ${o.text.trim()?'':'gap'} ${S.tests[o.k]?'':'todo'}" data-trow="${o.k}"><label class="chk" for="ts-${o.k}"><input type="checkbox" id="ts-${o.k}" data-ts="${o.k}" ${S.tests[o.k]?'checked':''}><b>${esc(o.t)}</b></label>${o.text.trim()?`<div class="tdesign"><span class="note">Your design says (${esc(o.where)}):</span><pre>${esc(o.text.trim())}</pre></div>`:`<div class="tdesign gapmsg">Nothing written yet. <button type="button" data-go="${o.go}">Go to step ${o.go+1}</button></div>`}</div>`).join('')}</div>
-   <h3>Review checklist</h3><div class="checks">${CHECKS.map((t,k)=>`<div class="trow ${S.checks[k]?'':'todo'}" data-crow="${k}"><label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(t)}</label>${GO[k].length?`<div class="tdesign">${linkBtns(k)}</div>`:''}</div>`).join('')}</div>
+   <h3>Review checklist</h3><div class="checks">${CHECKS.map((t,k)=>SPECCK.includes(k)?'':`<div class="trow ${S.checks[k]?'':'todo'}" data-crow="${k}"><label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(t)}</label>${GO[k].length?`<div class="tdesign">${linkBtns(k)}</div>`:''}</div>`).join('')}</div>
    ${omitted.length?`<h3>Recommended cards you left out</h3><p class="hint">If you leave out a recommended card, note why its function is not needed or which other card covers it.</p>${omitted.map(id=>`<div class="row"><label for="om-${id}">${id} ${esc(cardById(id).name)}</label><input type="text" id="om-${id}" data-om="${id}" value="${esc(S.omit[id]||'')}"></div>`).join('')}`:''}
    ${S.used['GC-09']?'':'<p class="hint">You do not use GC-09, so end the conversation with a short closing that refers back to the objective of GC-01.</p>'}`}
-  if(i===7){const m=missing();
+  if(i===7){
    h=`<h2>Conversation design specification</h2><p class="q">The completed worksheet, the cards you selected with the values for your course, and the order of the conversation.</p>
    <p class="hint">It describes what the chatbot should do and does not depend on a particular chatbot tool. You can hand it to whoever sets up the chatbot.</p>
-   ${m.length?`<div class="warn"><b>Not yet filled in:</b><ul class="missing">${m.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'<div class="box">All steps and instance fields are filled in.</div>'}
+   <div id="miss">${missHtml()}</div>
    <div class="tools"><button type="button" class="primary" id="copy">Copy specification</button><button type="button" id="dl-txt">Download as text file</button><span class="note" id="copied" role="status"></span></div>
-   <pre id="spec" tabindex="0">${esc(spec())}</pre>`}
+   <pre id="spec" tabindex="0">${esc(spec())}</pre>
+   <h3>Two last questions</h3><p class="hint">Answer them after you have read the specification above.</p>
+   <div class="checks">${SPECCK.map(k=>`<div class="trow ${S.checks[k]?'':'todo'}" data-crow="${k}"><label class="chk" for="ck-${k}"><input type="checkbox" id="ck-${k}" data-ck="${k}" ${S.checks[k]?'checked':''}>${esc(CHECKS[k])}</label></div>`).join('')}</div>`}
   document.getElementById('main').innerHTML=`<section class="panel">${h}<div class="nav">${i>-1?`<button type="button" data-go="${i-1}">Previous</button>`:'<span></span>'}${i<7?`<button type="button" class="primary" data-go="${i+1}">${i===-1?'Start with step 1':i===6?'Show specification':'Next'}</button>`:''}</div></section>`;
 }
 function introHtml(){
@@ -417,12 +422,15 @@ function missing(){const m=[];
  if(!filled('bound').length)m.push('Step 6: requests outside the role');
  const nc=CARDS.filter(c=>isUsed(c)&&needsBoxes(c)&&!detailsDone(c.id)).map(c=>c.id);
  if(nc.length)m.push('Your decision for '+nc.join(', ')+' (open the card in its step)');
- const n=CHECKS.filter((_,k)=>!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
+ const n=CHECKS.filter((_,k)=>!SPECCK.includes(k)&&!S.checks[k]).length;if(n)m.push(`Step 7: ${n} review question${n>1?'s':''} still open`);
+ const n2=SPECCK.filter(k=>!S.checks[k]).length;if(n2)m.push(`Below the specification: ${n2} review question${n2>1?'s':''} still open`);
  const nt2=(isReflective()?TESTS_REFL:TESTS_TASK).filter((_,k)=>!S.tests[k]).length;if(nt2)m.push(`Step 7: ${nt2} test input${nt2>1?'s':''} not ticked yet`);
  return m}
+function missHtml(){const m=missing();return m.length?`<div class="warn"><b>Not yet filled in:</b><ul class="missing">${m.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'<div class="box">Everything is filled in. You can copy the specification, download it as a text file, or keep your whole design with “Save to file” at the top of the page.</div>'}
+function refreshSpec(){const p=document.getElementById('spec');if(p)p.textContent=spec();const m=document.getElementById('miss');if(m)m.innerHTML=missHtml()}
 function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(v||'').trim()||'(not filled in)')+'\n');
  L.push('CONVERSATION DESIGN SPECIFICATION\n');
- L.push('HOW TO READ THIS SPECIFICATION\nThis document was written by a lecturer. It describes how a chatbot conducts one conversation with students of a university course. If you are the chatbot, follow it. If you are a person building the chatbot, use it as the design. The conversation is built from guideline cards. A guideline card is a short rule for one move of the chatbot, for example how it opens the conversation, how it gives a hint or how it refuses a request. Each selected card is listed at the end with when it applies, what the chatbot does, its limits and the values the lecturer chose for this course. The labels such as GC-05 only name the cards. The chatbot does not mention them to students.\n');
+ L.push('HOW TO READ THIS SPECIFICATION\nThis document was written by a lecturer. It describes how a chatbot conducts one conversation with students of a university course. If you are the chatbot, follow it. If you are a person building the chatbot, use it as the design. The conversation is built from guideline cards. A guideline card is a short rule for one move of the chatbot, for example how it opens the conversation, how it gives a hint or how it refuses a request. Each selected card is listed at the end with when it applies, what the chatbot does, its limits and the decision of the lecturer for this course. The labels such as GC-05 only name the cards. The chatbot does not mention them to students.\n');
  L.push('1 PURPOSE DEFINITION');add('Learning objective',S.objective);add('Intended student activity',S.activity);
  L.push('2 LEARNER SITUATION ANALYSIS');add('Expected prior knowledge',S.prior);
  add('Typical misconceptions and counterexamples',filled('misc').map(p=>'- '+p.a+(p.b?' (counterexample: '+p.b+')':'')).join('\n')||(isReflective()?'None listed.':''));
@@ -434,7 +442,8 @@ function spec(){const r=row();const L=[];const add=(t,v)=>L.push(t+'\n'+(String(
  add(isReflective()?'Unsupported judgement':'Other incorrect answer',S.r_incorrect);if(isReflective())add('Action whose consequences the student has not evaluated',S.r_action);else add('Correct answer',S.r_correct);
  L.push('6 BOUNDARY DEFINITION');add('Requests outside the role',filled('bound').map(p=>'- '+p.a+(p.b?' -> '+p.b:'')).join('\n'));
  L.push('SELECTED GUIDELINE CARDS\nEach card is a rule for one move of the chatbot. Apply every card where its condition holds.\n');
- L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};if(c.id==='GC-02')return c.id+' '+c.name+' (applies in every conversation)\n  Chosen at design time: '+(r?r.method:'(not filled in)')+'. The conversation uses this one main teaching method. Other methods appear only as short branches.';const lk=linkText(c.id).trim();const ind=t=>t.replace(/\n/g,'\n    ');return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+(lk?'\n  From step '+LINKS[c.id].n+':\n    '+ind(lk):'')+((v.ex&&v.ex.trim())||!lk?'\n  Example from this course: '+(v.ex&&v.ex.trim()?v.ex.trim():'(not filled in)'):'')+((v.va&&v.va.trim())||!lk?'\n  Values chosen by the lecturer: '+(v.va&&v.va.trim()?v.va.trim():'(not filled in)'):'')+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
+ L.push(CARDS.filter(isUsed).map(c=>{const v=S.vals[c.id]||{};if(c.id==='GC-02')return c.id+' '+c.name+' (applies in every conversation)\n  Chosen at design time: '+(r?r.method:'(not filled in)')+'. The conversation uses this one main teaching method. Other methods appear only as short branches.';const lk=linkText(c.id).trim();const LK=LINKS[c.id];const va=v.va&&v.va.trim()?v.va.trim():'';const own=LK&&LK.counts!==false&&lk;
+   return c.id+' '+c.name+(c.core?' (applies in every conversation)':'')+'\n  Applies when: '+c.when+'\n  What the chatbot does: '+c.does+'\n  Limits: '+c.limits+(lk?'\n  Content: see section '+LK.sec+' ('+LK.secname+') above. It is not repeated here.':'')+(v.ex&&v.ex.trim()?'\n  Example from this course: '+v.ex.trim():'')+(va?'\n  Decision of the lecturer: '+va:(own?'':(DEF[c.id]?'\n  Decision of the lecturer: none given. Default of the card: '+DEF[c.id]:'\n  Decision of the lecturer: (not filled in)')))+(v.no&&v.no.trim()?'\n  Notes: '+v.no.trim():'')}).join('\n\n')+'\n');
  const om=recommended().filter(id=>!S.used[id]);const tl=isReflective()?TESTS_REFL:TESTS_TASK;
  L.push('NOTES FOR THE LECTURER AND DEVELOPER, NOT INSTRUCTIONS TO THE CHATBOT\n\nReview checklist (step 7)\n'+CHECKS.map((q,k)=>(S.checks[k]?'[x] ':'[ ] ')+q).join('\n')+'\n\nTest inputs. Marked when the design describes a response.\n'+tl.map((q,k)=>(S.tests[k]?'[x] ':'[ ] ')+q).join('\n')+'\n');
  if(om.length)L.push('Recommended cards left out\n'+om.map(id=>'- '+id+': '+(S.omit[id]||'(reason not noted)')).join('\n')+'\n');
@@ -449,16 +458,17 @@ function testSource(k){const rf=isReflective();
   case 2:return {text:S.r_incorrect,where:'Step 5',go:4};
   case 3:return {text:S.r_unclear,where:'Step 5',go:4};
   case 4:return {text:bound,where:'Step 6',go:5};
-  default:return {text:[S.used['GC-10']?v('GC-10'):'',bound].filter(Boolean).join('\n'),where:'Step 5 and step 6',go:4}}}
+  default:{const h=S.used['GC-10']?(v('GC-10')||DEF['GC-10']):'',a=S.used['GC-11']?v('GC-11'):'';return {text:[h?'Hints: '+h:'',a?'Attempts before a worked example: '+a:'',bound?'Where requests outside the role go:\n'+bound:''].filter(Boolean).join('\n'),where:'Step 5 and step 6',go:4}}}}
  switch(k){
   case 0:return {text:S.r_incorrect,where:'Step 5',go:4};
   case 1:return {text:S.r_action,where:'Step 5',go:4};
   case 2:return {text:S.r_unclear,where:'Step 5',go:4};
   case 3:return {text:bound,where:'Step 6',go:5};
   default:return {text:[S.r_unclear,v('GC-12')].filter(Boolean).join('\n'),where:'Step 5',go:4}}}
-function refreshReview(){const rc=document.getElementById('rv-count');if(!rc)return;
+function refreshReview(){const rc=document.getElementById('rv-count');
  document.querySelectorAll('[data-ts]').forEach(i=>{const r=i.closest('.trow');if(r)r.classList.toggle('todo',!i.checked)});
  document.querySelectorAll('[data-ck]').forEach(i=>{const r=i.closest('.trow');if(r)r.classList.toggle('todo',!i.checked)});
+ if(!rc)return;
  const nt=document.querySelectorAll('[data-ts]:not(:checked)').length,nk=document.querySelectorAll('[data-ck]:not(:checked)').length;
  rc.textContent=(nt+nk)?`Still open: ${nt} test input${nt===1?'':'s'} and ${nk} checklist question${nk===1?'':'s'}.`:'All test inputs and checklist questions are ticked.'}
 function render(nav){const keep=nav?[]:[...document.querySelectorAll('details[data-card][open]')].map(d=>d.dataset.card);const a=document.activeElement;const id=a&&a.id;const ss=a&&a.selectionStart,se=a&&a.selectionEnd;
@@ -477,7 +487,7 @@ const changed=()=>sig(S)!==sig(EMPTY);
 document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]');if(g){S.step=+g.dataset.go;S.open='';save();render(true);window.scrollTo({top:0});return}
   const ex=e.target.closest('[data-example]');if(ex){document.getElementById('btn-example').click();return}
-  const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1;defaults(c.id)});save();render();return}
+  const tr=e.target.closest('[data-tickrec]');if(tr){const st=+tr.dataset.tickrec;CARDS.filter(c=>c.stage===st&&!c.core&&recommended().includes(c.id)&&cardFit(c)).forEach(c=>{S.used[c.id]=1});save();render();return}
   const pa=e.target.closest('[data-padd]');if(pa){const k=pa.dataset.padd;if(!S[k].length)S[k].push({a:'',b:''});S[k].push({a:'',b:''});save();render();return}
   const pr=e.target.closest('[data-prm]');if(pr){const[k,i]=pr.dataset.prm.split('|');S[k].splice(+i,1);save();render();return}
   if(e.target.id==='dl-txt'){const t='\ufeff'+document.getElementById('spec').textContent.replace(/\r?\n/g,'\r\n');dl(t,'text/plain;charset=utf-8','conversation-design-specification.txt');return}
@@ -515,11 +525,11 @@ main.addEventListener('input',e=>{const t=e.target;
 main.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.row!==undefined){S.row=+t.dataset.row;if(!row().roles.includes(S.role))S.role='';save();render();return}
   if(t.dataset.role){S.role=t.dataset.role;save();render();return}
-  if(t.dataset.use){if(t.checked){S.used[t.dataset.use]=1;defaults(t.dataset.use)}else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
-  if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();refreshReview();return}
+  if(t.dataset.use){if(t.checked){S.used[t.dataset.use]=1}else delete S.used[t.dataset.use];S.open=t.dataset.use;save();render();return}
+  if(t.dataset.ck!==undefined){S.checks[t.dataset.ck]=t.checked;save();refreshDone();refreshReview();refreshSpec();return}
   if(t.dataset.ts!==undefined){S.tests[t.dataset.ts]=t.checked;save();refreshDone();refreshReview()}});
 main.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.card){if(d.open)S.open=d.dataset.card}},true);
-function refreshBadge(id){const s=document.querySelector('details[data-card="'+id+'"] .badge.status');if(s){const d=detailsDone(id);s.className='badge status '+(d?'ok':'todo');s.textContent=d?'Decision filled in':'Write your decision'}}
+function refreshBadge(id){const s=document.querySelector('details[data-card="'+id+'"] .badge.status');if(s){const st=statusOf(id);s.className='badge status '+(st.ok?'ok':'todo');s.textContent=st.t}}
 function refreshDone(){document.querySelectorAll('#stepbar button[data-go]').forEach(b=>{const k=+b.dataset.go;if(k>=0)b.classList.toggle('done',done(k))})}
 render();
 (function(){let seen=false;try{seen=sessionStorage.getItem('gc-seen')==='1';sessionStorage.setItem('gc-seen','1')}catch(e){}
