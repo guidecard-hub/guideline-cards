@@ -74,7 +74,7 @@ Supervisors: Charuta Pande and Andreas Martin.
 
 ## Licence
 
-No licence has been chosen yet. Until one is added, all rights are reserved by the author.
+The prototype and its documents are published under the MIT licence, see [LICENSE](LICENSE). Anyone may use, copy, change and share them, also for future research and teaching, if the copyright notice stays with the copies. The example in the tool is a constructed scenario and not a tested chatbot design.
 
 ## How to cite
 
