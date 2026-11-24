@@ -14,7 +14,7 @@ Lecturer-Facing Guideline Cards for Higher Education*.
 
 1. Opens the page and reads the start page. The button "Load example" fills in a constructed example.
 2. Works through the seven steps (purpose, learner situation, role, dialogue flow, feedback and repair, boundaries, review).
-3. Uses the 14 guideline cards that the selection matrix recommends. Five cards are core cards and apply in every design.
+3. Uses the 14 guideline cards that the selection matrix recommends. Five cards are core cards and apply in every design. Each card is a ready-made rule. The lecturer fills in the cards they use for their course, and only these filled-in cards end up in the specification.
 4. Copies or downloads the finished specification and hands it to whoever sets up the chatbot, or uses it as a draft for the instructions of a chatbot.
 5. Can save the entries as a file at any time and load them again later or on another computer.
 
